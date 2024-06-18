@@ -31,12 +31,6 @@ func authenticateUser(db *sql.DB, email, password string) (bool, error) {
 		}
 		return false, err
 	}
-	// Hashlenmiş şifreyi karşılaştır
-	// err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
-	// if err != nil {
-	// 	return false, nil
-	// }
-	// return true, nil
 
 	// Şifreyi karşılaştır (şifreleme olmadan)
 	if password != storedPassword {
@@ -55,12 +49,18 @@ func generateSessionID() (string, error) {
 }
 
 // Kullanıcıyı giriş yapmış olarak ayarlar
-func setSession(w http.ResponseWriter, email string) error {
+func setSession(w http.ResponseWriter, email string, rememberMe bool) error {
 	sessionID, err := generateSessionID()
 	if err != nil {
 		return err
 	}
-	expiration := time.Now().Add(24 * time.Hour)
+
+	var expiration time.Time
+	if rememberMe {
+		expiration = time.Now().Add(30 * 24 * time.Hour)
+	} else {
+		expiration = time.Now().Add(24 * time.Hour)
+	}
 
 	cookie := http.Cookie{
 		Name:     "session_token",
@@ -73,8 +73,14 @@ func setSession(w http.ResponseWriter, email string) error {
 	// Bu kısımda sessionID ve email'i bir session tablosuna kaydedebilirsiniz
 	// veya başka bir oturum yönetim sistemi kullanabilirsiniz.
 
+	// For demonstration purposes, we'll store the session in memory
+	sessionStore[sessionID] = email
+
 	return nil
 }
+
+// Store sessions in memory (for demonstration purposes)
+var sessionStore = map[string]string{}
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -84,6 +90,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	email := r.FormValue("email")
 	password := r.FormValue("password")
+	rememberMe := r.FormValue("remember_me") == "on"
 
 	db, err := openDatabase()
 	if err != nil {
@@ -103,15 +110,33 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = setSession(w, email)
+	err = setSession(w, email, rememberMe)
 	if err != nil {
 		http.Error(w, "Session error", http.StatusInternalServerError)
 		return
 	}
 
-	// Giriş başarılı olduğunda mesajı yazdır
-	fmt.Fprintf(w, "Giriş başarılı! Hoş geldiniz, %s.", email)
-
 	// Ana sayfaya yönlendir
 	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
+}
+
+func homepageHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	email, ok := sessionStore[cookie.Value]
+	if !ok {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Kullanıcının email adresini göster
+	fmt.Fprintf(w, "Giriş başarılı! Hoş geldiniz, %s.", email)
 }
