@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Meta etiketleri sayfanın karakter seti ve görüntüleme ayarları için -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Harici CSS dosyaları -->
+    <link rel="stylesheet" href="/static/css/profile.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+        crossorigin="anonymous" />
+    <!-- JavaScript dosyası -->
+    <script src="/static/js/login.js"></script>
+</head>
+
+<body>
+    <!-- Yan menü başlangıcı -->
+    <div class="sidebar">
+        <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
+        <!-- Ana Sayfa -->
+        <button class="sidebarOption">
+            <span class="material-icons">home</span>
+            <h2>Ana Sayfa</h2>
+        </button>
+        <!-- Keşfet -->
+        <button class="sidebarOption">
+            <span class="material-icons">search</span>
+            <h2>Keşfet</h2>
+        </button>
+        <!-- Mesajlar -->
+        <button class="sidebarOption">
+            <span class="material-icons">mail_outline</span>
+            <h2>Mesajlar</h2>
+        </button>
+        <!-- Profil (aktif sayfa) -->
+        <button class="sidebarOption active">
+            <span class="material-icons">perm_identity</span>
+            <h2>Profil</h2>
+        </button>
+    </div>
+    <!-- Yan menü sonu -->
+
+    <!-- İçerik başlangıcı -->
+    <div class="feed">
+        <div class="feed__header">
+            <h2>Profil</h2>
+        </div>
+
+        <!-- Profil Bölümü Başlangıcı -->
+        <div class="profile">
+            <!-- Banner Resmi -->
+            <div class="profile__banner">
+                <img src="https://via.placeholder.com/600x200" alt="Banner Resmi" />
+            </div>
+            <!-- Profil Bilgisi -->
+            <div class="profile__info">
+                <!-- Profil Resmi -->
+                <div class="profile__picture">
+                    <img src="https://via.placeholder.com/150" alt="Profil Resmi" />
+                </div>
+                <!-- Kullanıcı Bilgisi -->
+                <div class="profile__details">
+                    <h2>Ad Soyad</h2>
+                    <h3>@kullaniciadi</h3>
+                    <p>Biyografi metni burada olacak.</p>
+                    <button class="profile__editButton">Profili Düzenle</button>
+                </div>
+            </div>
+            <!-- Profil Düzenleme Modalı -->
+            <div class="modal" id="editProfileModal">
+                <div class="modal__content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h2>Profili Düzenle</h2>
+                    <form class="modal__form">
+                        <div class="modal__section">
+                            <h3>Kullanıcı Bilgisi</h3>
+                            <label for="username">Kullanıcı Adı</label>
+                            <input type="text" id="username" name="username" />
+                            <label for="firstName">İsim</label>
+                            <input type="text" id="firstName" name="firstName" />
+                            <label for="lastName">Soyisim</label>
+                            <input type="text" id="lastName" name="lastName" />
+                            <label for="bio">Biyografi</label>
+                            <textarea id="bio" name="bio"></textarea>
+                            <label for="email">E-posta</label>
+                            <input type="email" id="email" name="email" />
+                        </div>
+                        <div class="modal__section">
+                            <h3>Güvenlik</h3>
+                            <label for="oldPassword">Eski Şifre</label>
+                            <input type="password" id="oldPassword" name="oldPassword" />
+                            <label for="newPassword">Yeni Şifre</label>
+                            <input type="password" id="newPassword" name="newPassword" />
+                        </div>
+                        <button type="submit">Güncelle</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Profil Bölümü Sonu -->
+
+        <!-- Kullanıcı Gönderileri Bölümü Başlangıcı -->
+        <div class="userPosts">
+            <!-- Her gönderi buraya gelecek, mevcut gönderi şablonu yapısı gibi -->
+            {{range .}}
+            <div class="post">
+                <div class="post__avatar">
+                    <img src="https://via.placeholder.com/50" alt="" />
+                </div>
+                <div class="post__body">
+                    <div class="post__header">
+                        <div class="post__headerText">
+                            <h3>{{.UserData.Name}} {{.UserData.Surname}}
+                                <span class="post__headerSpecial">
+                                    <span class="material-icons post__badge">verified</span>
+                                    @{{.UserData.Username}}
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="post__headerDescription">
+                            <p>{{.PostData.PostContent}}</p>
+                        </div>
+                    </div>
+                    <img src="https://via.placeholder.com/450" alt="" />
+                    <div class="post__footer">
+                        <!-- Beğeni, Beğenme ve Yorum İkonları -->
+                        <div class="post__icons">
+                            <span class="material-icons post__icon">thumb_up</span>
+                            <span class="material-icons post__icon">thumb_down</span>
+                            <span class="material-icons post__icon">comment</span>
+                        </div>
+                        <!-- Düzenle Butonu -->
+                        <button class="post__editButton">Düzenle</button>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+        <!-- Kullanıcı Gönderileri Bölümü Sonu -->
+    </div>
+    <!-- İçerik sonu -->
+
+    <!-- Widgetlar başlangıcı -->
+    <div class="widgets">
+        <div class="widgets__input">
+            <span class="material-icons widgets__searchIcon">search</span>
+            <input type="text" placeholder="Ara.." />
+        </div>
+
+        <div class="widgets__widgetContainer">
+            <h2>En Çok Beğenilen Gönderileriniz</h2>
+            <div class="post__body">
+                <div class="post__header">
+                    <div class="post__headerText">
+                        <h3>
+                            {{.UserData.Name}} {{.UserData.Surname}}
+                            <span class="post__headerSpecial">
+                                <span class="material-icons post__badge">verified</span>
+                                @{{.UserData.Username}}
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="post__headerDescription">
+                        <p>{{.PostData.PostContent}}</p>
+                    </div>
+                </div>
+                <img src="https://via.placeholder.com/450" alt="" />
+                <div class="post__footer">
+                    <!-- Beğeni İkonu -->
+                    <span class="material-icons" onclick="likePost()">thumb_up</span>
+                    
+                    <!-- Beğenmeme İkonu -->
+                    <span class="material-icons" onclick="dislikePost()">thumb_down</span>
+                    
+                    <!-- Yorum İkonu -->
+                    <span class="material-icons" onclick="commentPost()">comment</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Widgetlar sonu -->
+
+</body>
+
+</html>
