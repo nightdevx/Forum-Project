@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/homepage.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+        crossorigin="anonymous" />
+</head>
+
+<body>
+    <!-- Yorum Popup Penceresi -->
+<div id="yorumPopup" class="yorum-popup">
+    <div class="yorum-popup-content">
+        <span class="yorum-popup-close">&times;</span>
+        <h2>Yorumlar</h2>
+        <!-- Yorumların gösterileceği yer -->
+        <div class="yorum-liste">
+            <!-- Örnek bir yorum -->
+            <p><strong>Kullanıcı Adı:</strong> Bu harika bir gönderi!</p>
+        </div>
+        <!-- Yorum ekleme formu -->
+        <div class="yorum-ekle">
+            <input type="text" id="yorumInput" placeholder="Yorumunuzu yazın...">
+            <button id="yorumEkleButton">Yorum Ekle</button>
+        </div>
+    </div>
+</div>
+
+    <!-- sidebar starts -->
+<div class="sidebar">
+    <!-- Twitter icon replaced with a custom image -->
+    <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
+    <button class="sidebarOption active">
+        <span class="material-icons"> home </span>
+        <h2>Ana Sayfa</h2>
+    </button>
+
+    <button class="sidebarOption">
+        <span class="material-icons"> search </span>
+        <h2>Keşfet</h2>
+    </button>
+
+    <button class="sidebarOption">
+        <span class="material-icons"> mail_outline </span>
+        <h2>Mesajlar</h2>
+    </button>
+
+    <button class="sidebarOption">
+        <span class="material-icons"> perm_identity </span>
+        <h2>Profil</h2>
+    </button>
+</div>
+<!-- sidebar ends -->
+
+    <!-- feed starts -->
+    <div class="feed">
+        <div class="feed__header">
+            <h2>Hüpeye Hoşgeldiniz...</h2>
+        </div>
+
+        <!-- tweetbox starts -->
+<div class="tweetBox">
+    <form>
+        <div class="tweetbox__input">
+            <img src="https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png" alt="" />
+            <div class="tweetbox__inputContainer">
+                <input type="text" placeholder="Başlık ekleyin..." class="tweetbox__inputTitle" />
+                <input type="text" placeholder="Düşüncelerini paylaş.." class="tweetbox__inputMessage" />
+            </div>
+        </div>
+        <button class="tweetBox__tweetButton">Gönder</button>
+        <button class="tweetBox__cameraButton">
+            <span class="material-icons"> camera_alt </span>
+        </button>
+    </form>
+</div>
+<!-- tweetbox ends -->
+
+        <!-- post starts -->
+        {{range .}}
+        <div class="post">
+            <div class="post__avatar">
+                <img src="https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png" alt="" />
+            </div>
+
+            <div class="post__body">
+                <div class="post__header">
+                    <div class="post__headerText">
+                        <h3>
+                            {{.UserData.Name}} {{.UserData.Surname}}
+                            <span class="post__headerSpecial"><span class="material-icons post__badge"> verified
+                                </span>@{{.UserData.Username}}</span>
+                        </h3>
+                    </div>
+                    <div class="post__headerDescription">
+                        <p>{{.PostData.PostContent}}</p>
+                    </div>
+                </div>
+                <img src="https://www.focus2move.com/wp-content/uploads/2020/01/Tesla-Roadster-2020-1024-03.jpg"
+                    alt="" />
+                <div class="post__footer">
+                    <button class="post__footerButton">
+                        <span class="material-icons"> thumb_up </span> Beğen
+                    </button>
+                    <button class="post__footerButton">
+                        <span class="material-icons"> thumb_down </span> Beğenme
+                    </button>
+                    <button class="post__footerButton">
+                        <span class="material-icons"> comment </span> Yorum Yap
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{end}}
+        <!-- post ends -->
+    </div>
+    <!-- feed ends -->
+
+    <!-- widgets starts -->
+    <div class="widgets">
+        <div class="widgets__input">
+            <span class="material-icons widgets__searchIcon"> search </span>
+            <input type="text" placeholder="Ara.." />
+        </div>
+
+        <div class="widgets__widgetContainer">
+            <h2>En Çok Beğenilenler</h2>
+            <blockquote class="twitter-tweet">
+                <p lang="en" dir="ltr">
+                    Sunsets don&#39;t get much better than this one over
+                    <a href="https://twitter.com/GrandTetonNPS?ref_src=twsrc%5Etfw">@GrandTetonNPS</a>.
+                    <a href="https://twitter.com/hashtag/nature?src=hash&amp;ref_src=twsrc%5Etfw">#nature</a>
+                    <a href="https://twitter.com/hashtag/sunset?src=hash&amp;ref_src=twsrc%5Etfw">#sunset</a>
+                    <a href="http://t.co/YuKy2rcjyU">pic.twitter.com/YuKy2rcjyU</a>
+                </p>
+                &mdash; US Department of the Interior (@Interior)
+                <a href="https://twitter.com/Interior/status/463440424141459456?ref_src=twsrc%5Etfw">May 5, 2014</a>
+            </blockquote>
+            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
+        
+        <!-- Login and Signup Section -->
+        <div class="auth__container">
+            <h2>Hesabınız Yok Mu?</h2>
+            <button class="auth__signupButton">Kayıt Ol</button>
+            <button class="auth__loginButton">Giriş Yap</button>
+            <button class="auth__googleButton">
+                <i class="fab fa-google"></i> Google ile Giriş Yap
+            </button>
+        </div>
+    </div>
+    <!-- widgets ends -->
+</body>
+
+</html>
