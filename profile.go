@@ -66,14 +66,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 	editData := struct {
 		User    User
 		Img     string
-		Changes ChangeMessage
 	}{
 		User: userData,
 		Img:  convertImg(userData.Image),
-		Changes: ChangeMessage{
-			Message:   "",
-			IsChanged: false,
-		},
 	}
 
 	if r.Method == "GET" {
@@ -99,14 +94,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 			editData = struct {
 				User    User
 				Img     string
-				Changes ChangeMessage
 			}{
 				User: userData,
 				Img:  convertImg(userData.Image),
-				Changes: ChangeMessage{
-					Message:   "Eski şifrenizi yanlış girdiniz!",
-					IsChanged: true,
-				},
 			}
 			tmpl, err := template.ParseFiles("static/html/editProfile.html")
 			if err != nil {
@@ -124,14 +114,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 			editData = struct {
 				User    User
 				Img     string
-				Changes ChangeMessage
 			}{
 				User: userData,
 				Img:  convertImg(userData.Image),
-				Changes: ChangeMessage{
-					Message:   "Yeni şifreniz eskisiyle aynı olamaz!",
-					IsChanged: true,
-				},
 			}
 			tmpl, err := template.ParseFiles("static/html/editProfile.html")
 			if err != nil {
@@ -149,14 +134,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 			editData = struct {
 				User    User
 				Img     string
-				Changes ChangeMessage
 			}{
 				User: userData,
 				Img:  convertImg(userData.Image),
-				Changes: ChangeMessage{
-					Message:   "Şifrenizi girmediniz!",
-					IsChanged: true,
-				},
 			}
 			tmpl, err := template.ParseFiles("static/html/editProfile.html")
 			if err != nil {

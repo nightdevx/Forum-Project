@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var tmpl = template.Must(template.ParseFiles("static/html/signuppage.html"))
+var tmpl = template.Must(template.ParseFiles("static/html/signup.html"))
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {

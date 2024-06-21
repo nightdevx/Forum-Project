@@ -28,8 +28,3 @@ type User struct {
 	CreationDate string
 	Image        Image
 }
-
-type ChangeMessage struct {
-	Message   string
-	IsChanged bool
-}

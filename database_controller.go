@@ -107,38 +107,40 @@ func getPosts(userID int) ([]Post, error) {
 
 	return posts, nil
 }
-
-func getAllPosts() ([]postData, error) {
+func getAllPosts() []postData {
 	err := connectDatabase()
-	if err != nil {
-		return []postData{}, err
-	}
+	checkError(err)
 	defer database.Close()
-
-	query := `SELECT posts.title, posts.content, posts.created_at,posts.like_count,posts.dislike_count, users.username, users.name, users.surname
-FROM posts
-JOIN users ON posts.user_id = users.id
-ORDER BY posts.created_at DESC;
-`
-
-	rows, err := database.Query(query)
-	if err != nil {
-		return []postData{}, err
-	}
+	rows, err := database.Query(`
+		select users.username,users.name,users.surname, posts.title, posts.content, posts.created_at, posts.like_count, posts.dislike_count
+		from posts
+		join users on posts.user_id = users.id
+		order by posts.created_at desc
+	`)
+	checkError(err)
 	defer rows.Close()
 
 	var posts []postData
 	for rows.Next() {
-		var post postData
-		if err := rows.Scan(&post.PostData.PostTitle, &post.PostData.PostContent, &post.PostData.PostCreatedAt, &post.PostData.PostLikeCount, &post.PostData.PostDislikeCount, &post.UserData.Username, &post.UserData.Name, &post.UserData.Surname); err != nil {
-			return []postData{}, err
-		}
-		posts = append(posts, post)
+		var tempPostData postData
+		err = rows.Scan(&tempPostData.UserData.Username, &tempPostData.UserData.Name, &tempPostData.UserData.Surname, &tempPostData.PostData.PostTitle, &tempPostData.PostData.PostContent, &tempPostData.PostData.PostCreatedAt, &tempPostData.PostData.PostLikeCount, &tempPostData.PostData.PostDislikeCount)
+		checkError(err)
+		posts = append(posts, tempPostData)
 	}
+	return posts
+}
 
-	if err := rows.Err(); err != nil {
-		return []postData{}, err
+func checkError(err error) {
+	if err != nil {
+		panic(err)
 	}
+}
 
-	return posts, nil
+func insertPost(userID int, title, content string) {
+	stmt, err := database.Prepare("insert into posts (user_id, title, content) values (?, ?, ?)")
+	checkError(err)
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID, title, content)
+	checkError(err)
 }

@@ -8,7 +8,7 @@ import (
 func main() {
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	// http.HandleFunc("/", homePageHandler)
+	 http.HandleFunc("/", homePageHandler)
 	http.Handle("/profile", http.HandlerFunc(profileHandler))
 	http.Handle("/editProfile", http.HandlerFunc(editProfileHandler))
 	// http.Handle("/sharePost", sessionMiddleware(http.HandlerFunc(sharePostHandler)))
