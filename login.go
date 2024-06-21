@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -117,26 +116,5 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Ana sayfaya yönlendir
-	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
-}
-
-func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	email, ok := sessionStore[cookie.Value]
-	if !ok {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	// Kullanıcının email adresini göster
-	fmt.Fprintf(w, "Giriş başarılı! Hoş geldiniz, %s.", email)
+	http.Redirect(w, r, "/profile", http.StatusSeeOther)
 }
