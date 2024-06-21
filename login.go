@@ -1,11 +1,10 @@
 package main
 
 import (
-	"crypto/rand"
 	"database/sql"
-	"encoding/hex"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -20,41 +19,28 @@ func openDatabase() (*sql.DB, error) {
 	return db, nil
 }
 
-// Kullanıcının giriş bilgilerini doğrular
-func authenticateUser(db *sql.DB, email, password string) (bool, error) {
+// Kullanıcının giriş bilgilerini doğrular ve kullanıcı ID'sini döner
+func authenticateUser(db *sql.DB, email, password string) (bool, int, error) {
 	var storedPassword string
-	query := "SELECT password FROM users WHERE email = ?"
-	err := db.QueryRow(query, email).Scan(&storedPassword)
+	var userID int
+	query := "SELECT id, password FROM users WHERE email = ?"
+	err := db.QueryRow(query, email).Scan(&userID, &storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return false, nil
+			return false, 0, nil
 		}
-		return false, err
+		return false, 0, err
 	}
 
 	// Şifreyi karşılaştır (şifreleme olmadan)
 	if password != storedPassword {
-		return false, nil
+		return false, 0, nil
 	}
-	return true, nil
-}
-
-// Rastgele oturum kimliği oluşturur
-func generateSessionID() (string, error) {
-	bytes := make([]byte, 16)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
+	return true, userID, nil
 }
 
 // Kullanıcıyı giriş yapmış olarak ayarlar
-func setSession(w http.ResponseWriter, email string, rememberMe bool) error {
-	sessionID, err := generateSessionID()
-	if err != nil {
-		return err
-	}
-
+func setSession(w http.ResponseWriter, userID int, email string, rememberMe bool) error {
 	var expiration time.Time
 	if rememberMe {
 		expiration = time.Now().Add(30 * 24 * time.Hour)
@@ -64,22 +50,19 @@ func setSession(w http.ResponseWriter, email string, rememberMe bool) error {
 
 	cookie := http.Cookie{
 		Name:     "session_token",
-		Value:    sessionID,
+		Value:    strconv.Itoa(userID),
 		Expires:  expiration,
 		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)
 
-	// Bu kısımda sessionID ve email'i bir session tablosuna kaydedebilirsiniz
-	// veya başka bir oturum yönetim sistemi kullanabilirsiniz.
-
-	// For demonstration purposes, we'll store the session in memory
-	sessionStore[sessionID] = email
+	// Kullanıcı ID ve email'i bellekte sakla
+	sessionStore[strconv.Itoa(userID)] = email
 
 	return nil
 }
 
-// Store sessions in memory (for demonstration purposes)
+// Bellekte oturumları sakla (demonstrasyon amacıyla)
 var sessionStore = map[string]string{}
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +82,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	authenticated, err := authenticateUser(db, email, password)
+	authenticated, userID, err := authenticateUser(db, email, password)
 	if err != nil {
 		http.Error(w, "Authentication error", http.StatusInternalServerError)
 		return
@@ -110,7 +93,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = setSession(w, email, rememberMe)
+	err = setSession(w, userID, email, rememberMe)
 	if err != nil {
 		http.Error(w, "Session error", http.StatusInternalServerError)
 		return
@@ -131,7 +114,8 @@ func homepageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email, ok := sessionStore[cookie.Value]
+	userID := cookie.Value
+	email, ok := sessionStore[userID]
 	if !ok {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
