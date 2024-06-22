@@ -3,12 +3,15 @@ package main
 import (
 	"database/sql"
 	"html/template"
+	"io"
+	"log"
 	"net/http"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var tmpl = template.Must(template.ParseFiles("static/html/signup.html"))
+var tmpl = template.Must(template.ParseFiles("static/html/login.html"))
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -24,20 +27,15 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	message := ""
 
-	db, err := sql.Open("sqlite3", "database/forum.db")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
+	connectDatabase()
 
 	var existingUsername, existingEmail string
-	err = db.QueryRow("SELECT username FROM users WHERE username = ?", username).Scan(&existingUsername)
+	err := database.QueryRow("SELECT username FROM users WHERE username = ?", username).Scan(&existingUsername)
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = db.QueryRow("SELECT email FROM users WHERE email = ?", email).Scan(&existingEmail)
+	err = database.QueryRow("SELECT email FROM users WHERE email = ?", email).Scan(&existingEmail)
 	if err != nil && err != sql.ErrNoRows {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -57,19 +55,35 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Kullanıcı adı ve e-posta adresi yoksa, yeni kayıt oluşturulur.
-	stmt, err := db.Prepare("INSERT INTO users(username, name, surname, email, password) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := database.Prepare("INSERT INTO users(username, name, surname, email, password,image) VALUES(?, ?, ?, ?, ?,?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(username, name, surname, email, password)
+	_, err = stmt.Exec(username, name, surname, email, password, getDefaultImage())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Kayıt başarılı mesajı
-	tmpl.Execute(w, struct{ Message string }{Message: "Kayıt başarılı!"})
+	tmpl.Execute(w, nil)
+}
+
+func getDefaultImage() []byte {
+	file, err := os.Open("static/images/newuser.png")
+	if err != nil {
+		log.Println("Error retrieving the file")
+		return nil
+	}
+	defer file.Close()
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		log.Println("Error reading file")
+		return nil
+	}
+	return fileBytes
 }

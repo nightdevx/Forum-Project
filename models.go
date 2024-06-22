@@ -8,14 +8,11 @@ type postData struct {
 type Post struct {
 	PostTitle        string
 	PostContent      string
+	PostImage        string
 	PostCategory     string
 	PostLikeCount    int
 	PostDislikeCount int
 	PostCreatedAt    string
-}
-
-type Image struct {
-	ImageData []byte
 }
 
 type User struct {
@@ -26,5 +23,10 @@ type User struct {
 	Password     string
 	Biography    string
 	CreationDate string
-	Image        Image
+	BannerImage  string
+	ProfileImage string
+}
+
+type Image struct {
+	ImageData []byte
 }

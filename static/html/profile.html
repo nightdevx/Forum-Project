@@ -21,25 +21,31 @@
     <div class="sidebar">
         <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
         <!-- Ana Sayfa -->
-        <button class="sidebarOption">
-            <span class="material-icons">home</span>
-            <h2>Ana Sayfa</h2>
-        </button>
+        <form action="/homepage">
+            <button type="submit" class="sidebarOption">
+                <span class="material-icons">home</span>
+                <h2>Ana Sayfa</h2>
+            </button>
+        </form>
         <!-- Keşfet -->
-        <button class="sidebarOption">
-            <span class="material-icons">search</span>
-            <h2>Keşfet</h2>
-        </button>
+        <form action="">
+            <button class="sidebarOption">
+                <span class="material-icons">search</span>
+                <h2>Keşfet</h2>
+            </button>
+        </form>
         <!-- Mesajlar -->
         <button class="sidebarOption">
             <span class="material-icons">mail_outline</span>
             <h2>Mesajlar</h2>
         </button>
         <!-- Profil (aktif sayfa) -->
-        <button class="sidebarOption active">
-            <span class="material-icons">perm_identity</span>
-            <h2>Profil</h2>
-        </button>
+        <form action="/profile">
+            <button type="submit" class="sidebarOption active">
+                <span class="material-icons">perm_identity</span>
+                <h2>Profil</h2>
+            </button>
+        </form>
     </div>
     <!-- Yan menü sonu -->
 
@@ -53,19 +59,19 @@
         <div class="profile">
             <!-- Banner Resmi -->
             <div class="profile__banner">
-                <img src="https://via.placeholder.com/600x200" alt="Banner Resmi" />
+                <img src="data:image/png;base64,{{.User.BannerImage}}" alt="Banner Resmi" />
             </div>
             <!-- Profil Bilgisi -->
             <div class="profile__info">
                 <!-- Profil Resmi -->
                 <div class="profile__picture">
-                    <img src="https://via.placeholder.com/150" alt="Profil Resmi" />
+                    <img src="data:image/png;base64,{{.User.ProfileImage}}" alt="Profil Resmi" />
                 </div>
                 <!-- Kullanıcı Bilgisi -->
                 <div class="profile__details">
-                    <h2>Ad Soyad</h2>
-                    <h3>@kullaniciadi</h3>
-                    <p>Biyografi metni burada olacak.</p>
+                    <h2>{{.User.Name}} {{.User.Surname}}</h2>
+                    <h3>@{{.User.Username}}</h3>
+                    <p>{{.User.Biography}}</p>
                     <button class="profile__editButton">Profili Düzenle</button>
                 </div>
             </div>
@@ -105,26 +111,28 @@
         <!-- Kullanıcı Gönderileri Bölümü Başlangıcı -->
         <div class="userPosts">
             <!-- Her gönderi buraya gelecek, mevcut gönderi şablonu yapısı gibi -->
-            {{range .}}
+            {{range .Posts}}
             <div class="post">
                 <div class="post__avatar">
-                    <img src="https://via.placeholder.com/50" alt="" />
+                    <img src="data:image/png;base64,{{$.User.ProfileImage}}" alt="" />
                 </div>
                 <div class="post__body">
                     <div class="post__header">
                         <div class="post__headerText">
-                            <h3>{{.UserData.Name}} {{.UserData.Surname}}
+                            <h3>{{$.User.Name}} {{$.User.Surname}}
                                 <span class="post__headerSpecial">
                                     <span class="material-icons post__badge">verified</span>
-                                    @{{.UserData.Username}}
+                                    @{{$.User.Username}}
                                 </span>
                             </h3>
                         </div>
                         <div class="post__headerDescription">
-                            <p>{{.PostData.PostContent}}</p>
+                            <p>{{.PostContent}}</p>
                         </div>
                     </div>
-                    <img src="https://via.placeholder.com/450" alt="" />
+                    {{if .PostImage}}
+                    <img src="data:image/png;base64,{{.PostImage}}" alt="" />
+                    {{end}}
                     <div class="post__footer">
                         <!-- Beğeni, Beğenme ve Yorum İkonları -->
                         <div class="post__icons">
@@ -152,6 +160,7 @@
 
         <div class="widgets__widgetContainer">
             <h2>En Çok Beğenilen Gönderileriniz</h2>
+            {{range .MostLiked }}
             <div class="post__body">
                 <div class="post__header">
                     <div class="post__headerText">
@@ -171,14 +180,15 @@
                 <div class="post__footer">
                     <!-- Beğeni İkonu -->
                     <span class="material-icons" onclick="likePost()">thumb_up</span>
-                    
+
                     <!-- Beğenmeme İkonu -->
                     <span class="material-icons" onclick="dislikePost()">thumb_down</span>
-                    
+
                     <!-- Yorum İkonu -->
                     <span class="material-icons" onclick="commentPost()">comment</span>
                 </div>
             </div>
+            {{end}}
         </div>
     </div>
     <!-- Widgetlar sonu -->

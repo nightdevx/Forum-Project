@@ -27,9 +27,13 @@ func getUser(cookie *http.Cookie) (User, bool) {
 	defer database.Close()
 
 	var user User
-	query := "SELECT username, email, name,surname,created_at,image FROM users WHERE id = ?"
-	err = database.QueryRow(query, cookie.Value).Scan(&user.Username, &user.Email, &user.Name, &user.Surname, &user.CreationDate, &user.Image.ImageData)
+	var profileImg, bannerImg Image
+	query := "SELECT username, email, name,surname,created_at,image,banner FROM users WHERE id = ?"
+	err = database.QueryRow(query, cookie.Value).Scan(&user.Username, &user.Email, &user.Name, &user.Surname, &user.CreationDate, &profileImg.ImageData, &bannerImg.ImageData)
+	user.ProfileImage = convertImg(profileImg)
+	user.BannerImage = convertImg(bannerImg)
 	if err != nil {
+		fmt.Println(err)
 		return User{}, false
 	}
 	return user, true
@@ -43,8 +47,11 @@ func getUserFullInfo(cookie *http.Cookie) (User, bool) {
 	}
 
 	var user User
-	query := "SELECT username, email,biography, password,name,surname,image FROM users WHERE id = ?"
-	err = database.QueryRow(query, cookie.Value).Scan(&user.Username, &user.Email, &user.Biography, &user.Password, &user.Name, &user.Surname, &user.Image.ImageData)
+	var profileImg, bannerImg Image
+	query := "SELECT username, email,biography, password,name,surname,image,banner FROM users WHERE id = ?"
+	err = database.QueryRow(query, cookie.Value).Scan(&user.Username, &user.Email, &user.Biography, &user.Password, &user.Name, &user.Surname, &profileImg.ImageData, &bannerImg.ImageData)
+	user.ProfileImage = convertImg(profileImg)
+	user.BannerImage = convertImg(bannerImg)
 	if err != nil {
 		fmt.Println(err)
 		return User{}, false
@@ -107,12 +114,13 @@ func getPosts(userID int) ([]Post, error) {
 
 	return posts, nil
 }
+
 func getAllPosts() []postData {
 	err := connectDatabase()
 	checkError(err)
 	defer database.Close()
 	rows, err := database.Query(`
-		select users.username,users.name,users.surname, posts.title, posts.content, posts.created_at, posts.like_count, posts.dislike_count
+		select users.username,users.name,users.surname, posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
 		from posts
 		join users on posts.user_id = users.id
 		order by posts.created_at desc
@@ -123,7 +131,9 @@ func getAllPosts() []postData {
 	var posts []postData
 	for rows.Next() {
 		var tempPostData postData
-		err = rows.Scan(&tempPostData.UserData.Username, &tempPostData.UserData.Name, &tempPostData.UserData.Surname, &tempPostData.PostData.PostTitle, &tempPostData.PostData.PostContent, &tempPostData.PostData.PostCreatedAt, &tempPostData.PostData.PostLikeCount, &tempPostData.PostData.PostDislikeCount)
+		var image Image
+		err = rows.Scan(&tempPostData.UserData.Username, &tempPostData.UserData.Name, &tempPostData.UserData.Surname, &tempPostData.PostData.PostTitle, &tempPostData.PostData.PostContent, &tempPostData.PostData.PostCreatedAt, &tempPostData.PostData.PostLikeCount, &tempPostData.PostData.PostDislikeCount, &image.ImageData)
+		tempPostData.PostData.PostImage = convertImg(image)
 		checkError(err)
 		posts = append(posts, tempPostData)
 	}
@@ -137,6 +147,7 @@ func checkError(err error) {
 }
 
 func insertPost(userID int, title, content string) {
+	connectDatabase()
 	stmt, err := database.Prepare("insert into posts (user_id, title, content) values (?, ?, ?)")
 	checkError(err)
 	defer stmt.Close()

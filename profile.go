@@ -9,7 +9,7 @@ import (
 )
 
 func profileHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("ID")
+	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		fmt.Println(err)
 		http.Redirect(w, r, "/login", http.StatusFound)
@@ -20,6 +20,7 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 	userID, _ := strconv.Atoi(cookie.Value)
 	postData, _ := getPosts(userID)
 	if !hasUser {
+		fmt.Println("xx")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -27,11 +28,9 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 	profileData := struct {
 		User  User
 		Posts []Post
-		Img   string
 	}{
 		User:  userData,
 		Posts: postData,
-		Img:   convertImg(userData.Image),
 	}
 	tmpl, err := template.ParseFiles("static/html/profile.html")
 	if err != nil {
@@ -64,11 +63,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	editData := struct {
-		User    User
-		Img     string
+		User User
 	}{
 		User: userData,
-		Img:  convertImg(userData.Image),
 	}
 
 	if r.Method == "GET" {
@@ -92,11 +89,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 		oldPassword := r.FormValue("oldPassword")
 		if oldPassword != userData.Password && oldPassword != "" {
 			editData = struct {
-				User    User
-				Img     string
+				User User
 			}{
 				User: userData,
-				Img:  convertImg(userData.Image),
 			}
 			tmpl, err := template.ParseFiles("static/html/editProfile.html")
 			if err != nil {
@@ -112,11 +107,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		} else if oldPassword == newPassword && oldPassword != "" && newPassword != "" {
 			editData = struct {
-				User    User
-				Img     string
+				User User
 			}{
 				User: userData,
-				Img:  convertImg(userData.Image),
 			}
 			tmpl, err := template.ParseFiles("static/html/editProfile.html")
 			if err != nil {
@@ -132,11 +125,9 @@ func editProfileHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		} else if newPassword != "" && oldPassword == "" {
 			editData = struct {
-				User    User
-				Img     string
+				User User
 			}{
 				User: userData,
-				Img:  convertImg(userData.Image),
 			}
 			tmpl, err := template.ParseFiles("static/html/editProfile.html")
 			if err != nil {
