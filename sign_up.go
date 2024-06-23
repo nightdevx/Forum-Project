@@ -69,7 +69,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Kayıt başarılı mesajı
-	tmpl.Execute(w, nil)
+	tmpl.Execute(w, struct{ Message string }{Message: "kayıt başarılı"})
 }
 
 func getDefaultImage() []byte {
