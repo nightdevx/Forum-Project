@@ -35,7 +35,7 @@
     <div class="sidebar">
         <!-- Twitter icon replaced with a custom image -->
         <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
-        <form action="/homepage">
+        <form action="/home" method="get">
             <button type="submit" class="sidebarOption active">
                 <span class="material-icons"> home </span>
                 <h2>Ana Sayfa</h2>
@@ -50,14 +50,7 @@
             </button>
         </form>
 
-        <form action="">
-            <button type="submit" class="sidebarOption">
-                <span class="material-icons"> mail_outline </span>
-                <h2>Mesajlar</h2>
-            </button>
-        </form>
-
-        <form action="/profile">
+        <form action="/profile" method="get">
             <button type="submit" class="sidebarOption">
                 <span class="material-icons"> perm_identity </span>
                 <h2>Profil</h2>
@@ -71,24 +64,28 @@
         <div class="feed__header">
             <h2>Hüpeye Hoşgeldiniz...</h2>
         </div>
-
+        {{if .IsLoggedIn}}
         <!-- tweetbox starts -->
         <div class="tweetBox">
-            <form action="/" method="post">
+            <form action="/home" method="post" enctype="multipart/form-data">
                 <div class="tweetbox__input">
-                    <img src="data:image/png;base64,{{.User.ProfileImage}}" alt="" />
+                    <img src="data:image/png;base64,{{.User.ProfileImage}}" alt="" width="40px" />
                     <div class="tweetbox__inputContainer">
-                        <input type="text" placeholder="Başlık ekleyin..." class="tweetbox__inputTitle" name="title" />
+                        <input type="text" placeholder="Başlık ekleyin..." class="tweetbox__inputTitle" name="title"
+                            minlength="5" />
                         <input type="text" placeholder="Düşüncelerini paylaş.." class="tweetbox__inputMessage"
-                            name="content" />
+                            name="content" minlength="10" />
                     </div>
                 </div>
                 <button type="submit" class="tweetBox__tweetButton">Gönder</button>
                 <button class="tweetBox__cameraButton">
                     <span class="material-icons"> camera_alt </span>
                 </button>
+                <input type="file" id="postPicture" name="postPicture" accept="image/*" />
+
             </form>
         </div>
+        {{end}}
         <!-- tweetbox ends -->
 
         <!-- post starts -->
@@ -135,40 +132,69 @@
     </div>
     <!-- feed ends -->
 
-    <!-- widgets starts -->
     <div class="widgets">
         <div class="widgets__input">
-            <span class="material-icons widgets__searchIcon"> search </span>
+            <span class="material-icons widgets__searchIcon">search</span>
             <input type="text" placeholder="Ara.." />
         </div>
 
         <div class="widgets__widgetContainer">
-            <h2>En Çok Beğenilenler</h2>
-            <blockquote class="twitter-tweet">
-                <p lang="en" dir="ltr">
-                    Sunsets don&#39;t get much better than this one over
-                    <a href="https://twitter.com/GrandTetonNPS?ref_src=twsrc%5Etfw">@GrandTetonNPS</a>.
-                    <a href="https://twitter.com/hashtag/nature?src=hash&amp;ref_src=twsrc%5Etfw">#nature</a>
-                    <a href="https://twitter.com/hashtag/sunset?src=hash&amp;ref_src=twsrc%5Etfw">#sunset</a>
-                    <a href="http://t.co/YuKy2rcjyU">pic.twitter.com/YuKy2rcjyU</a>
-                </p>
-                &mdash; US Department of the Interior (@Interior)
-                <a href="https://twitter.com/Interior/status/463440424141459456?ref_src=twsrc%5Etfw">May 5, 2014</a>
-            </blockquote>
-            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-        </div>
+            <h2>En Çok Beğenilen Gönderiler</h2>
+            {{range .TopPosts}}
 
-        <!-- Login and Signup Section -->
-        <div class="auth__container">
-            <h2>Hesabınız Yok Mu?</h2>
-            <button class="auth__signupButton">Kayıt Ol</button>
-            <button class="auth__loginButton">Giriş Yap</button>
-            <button class="auth__googleButton">
-                <i class="fab fa-google"></i> Google ile Giriş Yap
-            </button>
+            <div class="post__body">
+                <div class="post__header">
+                    <div class="post__headerText">
+                        <h3>
+                            {{.UserData.Name}} {{.UserData.Surname}}
+                            <span class="post__headerSpecial">
+                                <span class="material-icons post__badge">verified</span>
+                                @{{.UserData.Username}}
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="post__headerDescription">
+                        <p>{{.PostData.PostContent}}</p>
+                    </div>
+                </div>
+                {{if .PostData.PostImage}}
+                <img src="data:image/png;base64,{{.PostData.PostImage}}" alt="" />
+                {{end}}
+                <div class="post__footer">
+                    <!-- Beğeni İkonu -->
+                    <form action="/home/likepost" method="post">
+                        <button type="submit" value="{{.PostData.PostID}}" name="id" class="material-icons"
+                            onclick="likePost()">thumb_up</button>
+                        <label>{{.PostData.PostLikeCount}}</label>
+                    </form>
+                    <!-- Beğenmeme İkonu -->
+                    <form action="/home/dislikepost" method="post">
+                        <button type="submit" value="{{.PostData.PostID}}" name="id" class="material-icons"
+                            onclick="dislikePost()">thumb_down</button>
+                        <label>{{.PostData.PostDislikeCount}}</label>
+                    </form>
+                    <!-- Yorum İkonu -->
+                    <span class="material-icons" onclick="commentPost()">comment</span>
+                </div>
+            </div>
+
+            {{end}}
         </div>
     </div>
+    <!-- Login and Signup Section -->
+    {{if not .IsLoggedIn}}
+    <div class="auth__container">
+        <h2>Hesabınız Yok Mu?</h2>
+        <button class="auth__signupButton">Kayıt Ol</button>
+        <button class="auth__loginButton">Giriş Yap</button>
+        <button class="auth__googleButton">
+            <i class="fab fa-google"></i> Google ile Giriş Yap
+        </button>
+    </div>
+    </div>
+    {{end}}
     <!-- widgets ends -->
+
 </body>
 
 </html>

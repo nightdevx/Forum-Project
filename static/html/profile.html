@@ -21,29 +21,32 @@
     <div class="sidebar">
         <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
         <!-- Ana Sayfa -->
-        <form action="/homepage">
-            <button type="submit" class="sidebarOption">
+        <form action="/home" method="get">
+            <button class="sidebarOption">
                 <span class="material-icons">home</span>
                 <h2>Ana Sayfa</h2>
             </button>
         </form>
         <!-- Keşfet -->
-        <form action="">
+        <form action="/" method="get">
             <button class="sidebarOption">
                 <span class="material-icons">search</span>
                 <h2>Keşfet</h2>
             </button>
         </form>
-        <!-- Mesajlar -->
-        <button class="sidebarOption">
-            <span class="material-icons">mail_outline</span>
-            <h2>Mesajlar</h2>
-        </button>
         <!-- Profil (aktif sayfa) -->
-        <form action="/profile">
+        <form action="/profile" method="get">
             <button type="submit" class="sidebarOption active">
                 <span class="material-icons">perm_identity</span>
                 <h2>Profil</h2>
+            </button>
+        </form>
+
+        <!-- Çıkış Yap -->
+        <form action="/logout" method="get">
+            <button type="submit" class="sidebarOption">
+                <span class="material-icons">logout</span>
+                <h2>Çıkış Yap</h2>
             </button>
         </form>
     </div>
@@ -71,28 +74,37 @@
                 <div class="profile__details">
                     <h2>{{.User.Name}} {{.User.Surname}}</h2>
                     <h3>@{{.User.Username}}</h3>
+                    {{if .User.Biography}}
                     <p>{{.User.Biography}}</p>
-                    <button class="profile__editButton">Profili Düzenle</button>
+                    {{end}}
+                    <button class="profile__editButton" onclick="openEditProfile()">Profili Düzenle</button>
                 </div>
             </div>
             <!-- Profil Düzenleme Modalı -->
             <div class="modal" id="editProfileModal">
                 <div class="modal__content">
-                    <span class="close" onclick="closeModal()">&times;</span>
+                    <span class="close" onclick="closeEditProfile()">&times;</span>
                     <h2>Profili Düzenle</h2>
-                    <form class="modal__form">
+                    <form enctype="multipart/form-data" action="/editProfile" method="post" class="modal__form">
+                        <div class="modal__section">
+                            <h3>Fotoğraf</h3>
+                            <label for="profilePicture">Profil Fotoğrafı</label>
+                            <input type="file" id="profilePicture" name="profilePicture" accept="image/*" />
+                            <label for="bannerPicture">Banner Fotoğrafı</label>
+                            <input type="file" id="bannerPicture" name="bannerPicture" accept="image/*" />
+                        </div>
                         <div class="modal__section">
                             <h3>Kullanıcı Bilgisi</h3>
                             <label for="username">Kullanıcı Adı</label>
-                            <input type="text" id="username" name="username" />
+                            <input type="text" id="username" name="username" value="{{.User.Username}}" />
                             <label for="firstName">İsim</label>
-                            <input type="text" id="firstName" name="firstName" />
+                            <input type="text" id="firstName" name="name" value="{{.User.Name}}" />
                             <label for="lastName">Soyisim</label>
-                            <input type="text" id="lastName" name="lastName" />
+                            <input type="text" id="lastName" name="surname" value="{{.User.Surname}}" />
                             <label for="bio">Biyografi</label>
-                            <textarea id="bio" name="bio"></textarea>
+                            <textarea id="bio" name="bio">{{.User.Biography}}</textarea>
                             <label for="email">E-posta</label>
-                            <input type="email" id="email" name="email" />
+                            <input type="email" id="email" name="email" value="{{.User.Email}}" />
                         </div>
                         <div class="modal__section">
                             <h3>Güvenlik</h3>
@@ -106,7 +118,6 @@
                 </div>
             </div>
         </div>
-        <!-- Profil Bölümü Sonu -->
 
         <!-- Kullanıcı Gönderileri Bölümü Başlangıcı -->
         <div class="userPosts">
@@ -114,7 +125,7 @@
             {{range .Posts}}
             <div class="post">
                 <div class="post__avatar">
-                    <img src="data:image/png;base64,{{$.User.ProfileImage}}" alt="" />
+                    <img src="data:image/png;base64,{{$.User.ProfileImage}}" alt="" width="40px" />
                 </div>
                 <div class="post__body">
                     <div class="post__header">
@@ -127,17 +138,25 @@
                             </h3>
                         </div>
                         <div class="post__headerDescription">
+                            <h3>{{.PostTitle}}</h3>
                             <p>{{.PostContent}}</p>
                         </div>
                     </div>
-                    {{if .PostImage}}
-                    <img src="data:image/png;base64,{{.PostImage}}" alt="" />
-                    {{end}}
+                    <img src="" alt="" />
                     <div class="post__footer">
                         <!-- Beğeni, Beğenme ve Yorum İkonları -->
                         <div class="post__icons">
-                            <span class="material-icons post__icon">thumb_up</span>
-                            <span class="material-icons post__icon">thumb_down</span>
+                            <form action="/profile/likepost" method="post">
+                                <button type="submit" value="{{.PostID}}" name="id" class="material-icons"
+                                    onclick="likePost()">thumb_up</button>
+                                <label>{{.PostLikeCount}}</label>
+                            </form>
+                            <!-- Beğenmeme İkonu -->
+                            <form action="/profile/dislikepost" method="post">
+                                <button type="submit" value="{{.PostID}}" name="id" class="material-icons"
+                                    onclick="dislikePost()">thumb_down</button>
+                                <label>{{.PostDislikeCount}}</label>
+                            </form>
                             <span class="material-icons post__icon">comment</span>
                         </div>
                         <!-- Düzenle Butonu -->
@@ -160,7 +179,7 @@
 
         <div class="widgets__widgetContainer">
             <h2>En Çok Beğenilen Gönderileriniz</h2>
-            {{range .MostLiked }}
+            {{range .MostLiked}}
             <div class="post__body">
                 <div class="post__header">
                     <div class="post__headerText">
@@ -176,14 +195,22 @@
                         <p>{{.PostData.PostContent}}</p>
                     </div>
                 </div>
+                {{if .PostData.PostImage}}
                 <img src="https://via.placeholder.com/450" alt="" />
+                {{end}}
                 <div class="post__footer">
                     <!-- Beğeni İkonu -->
-                    <span class="material-icons" onclick="likePost()">thumb_up</span>
-
+                    <form action="/profile/likepost" method="post">
+                        <button type="submit" value="{{.PostData.PostID}}" name="id" class="material-icons"
+                            onclick="likePost()">thumb_up</button>
+                        <label>{{.PostData.PostLikeCount}}</label>
+                    </form>
                     <!-- Beğenmeme İkonu -->
-                    <span class="material-icons" onclick="dislikePost()">thumb_down</span>
-
+                    <form action="/profile/dislikepost" method="post">
+                        <button type="submit" value="{{.PostData.PostID}}" name="id" class="material-icons"
+                            onclick="dislikePost()">thumb_down</button>
+                        <label>{{.PostData.PostDislikeCount}}</label>
+                    </form>
                     <!-- Yorum İkonu -->
                     <span class="material-icons" onclick="commentPost()">comment</span>
                 </div>
@@ -193,6 +220,28 @@
     </div>
     <!-- Widgetlar sonu -->
 
+    <!-- JavaScript kodları -->
+    <script>
+        // Modal açma işlevi
+        function openEditProfile() {
+            document.getElementById('editProfileModal').style.display = 'block';
+        }
+
+        // Modal kapama işlevi
+        function closeEditProfile() {
+            document.getElementById('editProfileModal').style.display = 'none';
+        }
+
+        // Modal açma işlevi
+        function openComments() {
+            document.getElementById('yorumPopup').style.display = 'block';
+        }
+
+        // Modal kapama işlevi
+        function closeComments() {
+            document.getElementById('yorumPopup').style.display = 'none';
+        }
+    </script>
 </body>
 
 </html>

@@ -1,11 +1,12 @@
 package main
 
-type postData struct {
+type PostData struct {
 	UserData User
 	PostData Post
 }
 
 type Post struct {
+	PostID           string
 	PostTitle        string
 	PostContent      string
 	PostImage        string

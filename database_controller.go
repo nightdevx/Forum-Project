@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -85,14 +86,14 @@ func updateUser(cookie *http.Cookie, user User) error {
 	return nil
 }
 
-func getPosts(userID int) ([]Post, error) {
+func getPosts(userID string) ([]Post, error) {
 	err := connectDatabase()
 	if err != nil {
 		return []Post{}, err
 	}
 	defer database.Close()
 
-	query := `SELECT title, content,created_at,like_count,dislike_count FROM posts WHERE user_id = ?`
+	query := `SELECT id, title, content, created_at, like_count, dislike_count FROM posts WHERE user_id = ? ORDER BY created_at DESC`
 	rows, err := database.Query(query, userID)
 	if err != nil {
 		return []Post{}, err
@@ -102,7 +103,7 @@ func getPosts(userID int) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.PostTitle, &post.PostContent, &post.PostCreatedAt, &post.PostLikeCount, &post.PostDislikeCount); err != nil {
+		if err := rows.Scan(&post.PostID, &post.PostTitle, &post.PostContent, &post.PostCreatedAt, &post.PostLikeCount, &post.PostDislikeCount); err != nil {
 			return []Post{}, err
 		}
 		posts = append(posts, post)
@@ -115,12 +116,12 @@ func getPosts(userID int) ([]Post, error) {
 	return posts, nil
 }
 
-func getAllPosts() []postData {
+func getAllPosts() []PostData {
 	err := connectDatabase()
 	checkError(err)
 	defer database.Close()
 	rows, err := database.Query(`
-		select users.username,users.name,users.surname, posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
+		select users.image,users.username,users.name,users.surname, posts.id,posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
 		from posts
 		join users on posts.user_id = users.id
 		order by posts.created_at desc
@@ -128,12 +129,14 @@ func getAllPosts() []postData {
 	checkError(err)
 	defer rows.Close()
 
-	var posts []postData
+	var posts []PostData
 	for rows.Next() {
-		var tempPostData postData
-		var image Image
-		err = rows.Scan(&tempPostData.UserData.Username, &tempPostData.UserData.Name, &tempPostData.UserData.Surname, &tempPostData.PostData.PostTitle, &tempPostData.PostData.PostContent, &tempPostData.PostData.PostCreatedAt, &tempPostData.PostData.PostLikeCount, &tempPostData.PostData.PostDislikeCount, &image.ImageData)
-		tempPostData.PostData.PostImage = convertImg(image)
+		var tempPostData PostData
+		var postImage Image
+		var userImage Image
+		err = rows.Scan(&userImage.ImageData, &tempPostData.UserData.Username, &tempPostData.UserData.Name, &tempPostData.UserData.Surname, &tempPostData.PostData.PostID, &tempPostData.PostData.PostTitle, &tempPostData.PostData.PostContent, &tempPostData.PostData.PostCreatedAt, &tempPostData.PostData.PostLikeCount, &tempPostData.PostData.PostDislikeCount, &postImage.ImageData)
+		tempPostData.PostData.PostImage = convertImg(postImage)
+		tempPostData.UserData.ProfileImage = convertImg(userImage)
 		checkError(err)
 		posts = append(posts, tempPostData)
 	}
@@ -146,12 +149,146 @@ func checkError(err error) {
 	}
 }
 
-func insertPost(userID int, title, content string) {
+func insertPost(userID int, title, content string, image []byte) {
 	connectDatabase()
-	stmt, err := database.Prepare("insert into posts (user_id, title, content) values (?, ?, ?)")
-	checkError(err)
-	defer stmt.Close()
+	var stmt *sql.Stmt
+	var err error
+	if image == nil {
+		stmt, err = database.Prepare("insert into posts (user_id, title, content) values (?, ?, ?)")
+		checkError(err)
+		defer stmt.Close()
 
-	_, err = stmt.Exec(userID, title, content)
-	checkError(err)
+		_, err = stmt.Exec(userID, title, content)
+		checkError(err)
+	} else {
+		stmt, err = database.Prepare("insert into posts (user_id, title, content,image) values (?, ?, ?,?)")
+		checkError(err)
+		defer stmt.Close()
+
+		_, err = stmt.Exec(userID, title, content, image)
+		checkError(err)
+	}
+}
+
+func increaseLikeCount(postID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE posts SET like_count = like_count + 1 WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(postID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decreaseLikeCount(postID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE posts SET like_count = like_count - 1 WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(postID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func increaseDislikeCount(postID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE posts SET dislike_count = dislike_count + 1 WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(postID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decreaseDislikeCount(postID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE posts SET dislike_count = dislike_count - 1 WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(postID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func saveImageToDB(data []byte, userID string, picture string) {
+	connectDatabase()
+	updateImageSQL := fmt.Sprintf("UPDATE users SET %s = ? WHERE id = ?", picture)
+	_, err := database.Exec(updateImageSQL, data, userID)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println("success")
+}
+
+func getUsersTopPosts(userID string) []PostData {
+	connectDatabase()
+	query := `select users.username,users.name,users.surname, posts.id,posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
+		from posts
+		join users on posts.user_id = users.id
+		WHERE user_id = ? ORDER BY like_count DESC LIMIT 3`
+	rows, err := database.Query(query, userID)
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	var posts []PostData
+	for rows.Next() {
+		var post PostData
+		var image Image
+		err = rows.Scan(&post.UserData.Username, &post.UserData.Name, &post.UserData.Surname, &post.PostData.PostID, &post.PostData.PostTitle, &post.PostData.PostContent, &post.PostData.PostCreatedAt, &post.PostData.PostLikeCount, &post.PostData.PostDislikeCount, &image.ImageData)
+		post.PostData.PostImage = convertImg(image)
+		checkError(err)
+		posts = append(posts, post)
+	}
+	return posts
 }

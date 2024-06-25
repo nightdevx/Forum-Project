@@ -554,3 +554,143 @@
 .post__footer span:hover {
   color: #DF3821; /* İkon hover rengi */
 }
+
+/* Modal Stilleri */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding-top: 60px;
+}
+
+.modal__content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  border-radius: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Modal */
+.modal {
+  display: none; /* Varsayılan olarak modal görünmez */
+  position: fixed;
+  z-index: 1001;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4); /* Yarı şeffaf siyah arka plan */
+}
+
+.modal__content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 60%; /* Modal genişliği */
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal__form label {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.modal__form input,
+.modal__form textarea {
+  margin-top: 5px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.modal__form textarea {
+  resize: vertical;
+}
+
+.modal__section {
+  margin-bottom: 20px;
+}
+
+.modal__section h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.modal__form button {
+  background-color: #DF3821;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+  align-self: center;
+}
+
+.modal__form button:hover {
+  background-color: #DF3821;
+}
+
+/* Profil Fotoğrafı Düzenleme */
+.modal__form input[type="file"] {
+  margin-top: 5px;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #DF3821;
+  width: 100%;
+}
+
+.modal__form input[type="file"]:hover {
+  border-color: #DF3821; /* Eğer istenirse hover durumunda sınır rengi değiştirilebilir */
+}
+

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,21 +11,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Veritabanı bağlantısını açar
-func openDatabase() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./database/forum.db")
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
 // Kullanıcının giriş bilgilerini doğrular ve kullanıcı ID'sini döner
-func authenticateUser(db *sql.DB, email, password string) (bool, int, error) {
+func authenticateUser( email, password string) (bool, int, error) {
 	var storedPassword string
 	var userID int
 	query := "SELECT id, password FROM users WHERE email = ?"
-	err := db.QueryRow(query, email).Scan(&userID, &storedPassword)
+	err := database.QueryRow(query, email).Scan(&userID, &storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false, 0, nil
@@ -67,7 +59,8 @@ var sessionStore = map[string]string{}
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.ServeFile(w, r, "./static/html/login.html")
+		tmpl, _ := template.ParseFiles("./static/html/login.html")
+		tmpl.Execute(w, nil)
 		return
 	}
 
@@ -75,30 +68,30 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	rememberMe := r.FormValue("remember_me") == "on"
 
-	db, err := openDatabase()
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		fmt.Println("Database connection error")
-		return
-	}
-	defer db.Close()
+	connectDatabase()
 
-	authenticated, userID, err := authenticateUser(db, email, password)
+	authenticated, userID, err := authenticateUser(email, password)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Error(w, "Authentication error", http.StatusInternalServerError)
 		fmt.Println("Authentication error")
 		return
 	}
 
 	if !authenticated {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		fmt.Println("Invalid email or password")
+		tmpl, _ := template.ParseFiles("./static/html/login.html")
+		data := struct {
+			ErrorMessage string
+		}{
+			ErrorMessage: "Geçersiz e-posta veya şifre",
+		}
+		tmpl.Execute(w, data)
+
 		return
 	}
 
 	err = setSession(w, userID, email, rememberMe)
 	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Error(w, "Session error", http.StatusInternalServerError)
 		fmt.Println("Session error")
 		return
 	}
