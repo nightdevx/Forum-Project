@@ -1,17 +1,34 @@
 package main
 
 import (
-	"log"
+	"html/template"
 	"net/http"
+	"strconv"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
-	fs := http.FileServer(http.Dir("."))
-	http.Handle("/", fs)
+func homePageHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := r.Cookie("session_token")
+	if r.Method == http.MethodPost {
+		title := r.FormValue("title")
+		content := r.FormValue("content")
+		userID, _ := strconv.Atoi(cookie.Value)
+		insertPost(userID, title, content)
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+	}
+	currentUser, _ := getUser(cookie)
+	homeData := struct {
+		User  User
+		Posts []postData
+	}{
+		User:  currentUser,
+		Posts: getAllPosts(),
+	}
 
-	log.Println("Sunucu 8080 portunda çalışıyor...")
-	err := http.ListenAndServe(":8080", nil)
+	tmpl := template.Must(template.ParseFiles("static/html/homepage.html"))
+	err := tmpl.Execute(w, homeData)
 	if err != nil {
-		log.Fatal(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

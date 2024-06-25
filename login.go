@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"time"
@@ -67,7 +68,8 @@ var sessionStore = map[string]string{}
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.ServeFile(w, r, "./static/html/login.html")
+		tmpl, _ := template.ParseFiles("./static/html/login.html")
+		tmpl.Execute(w, nil)
 		return
 	}
 
@@ -78,6 +80,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := openDatabase()
 	if err != nil {
 		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		fmt.Println("Database connection error")
 		return
 	}
 	defer db.Close()
@@ -85,17 +88,26 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	authenticated, userID, err := authenticateUser(db, email, password)
 	if err != nil {
 		http.Error(w, "Authentication error", http.StatusInternalServerError)
+		fmt.Println("Authentication error")
 		return
 	}
 
 	if !authenticated {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		tmpl, _ := template.ParseFiles("./static/html/login.html")
+		data := struct {
+			ErrorMessage string
+		}{
+			ErrorMessage: "Geçersiz e-posta veya şifre",
+		}
+		tmpl.Execute(w, data)
+
 		return
 	}
 
 	err = setSession(w, userID, email, rememberMe)
 	if err != nil {
 		http.Error(w, "Session error", http.StatusInternalServerError)
+		fmt.Println("Session error")
 		return
 	}
 

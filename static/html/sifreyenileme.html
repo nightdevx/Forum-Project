@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifre Yenileme</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Şifre Yenileme Formu</h2>
+        <form action="/sifreyenileme" method="POST">
+            <label for="email">E-posta:</label><br>
+            <input type="email" id="email" name="email" required><br><br>
+            <label for="tckimlik_last3">TC Kimlik Numarasının Son 3 Hanesi:</label><br>
+            <input type="text" id="tckimlik_last3" name="tckimlik_last3" required maxlength="3"><br><br>
+            <button type="submit">Şifre Yenile</button>
+        </form>
+        <div class="message">
+            {{ if .Message }}
+                {{ .Message }}
+            {{ end }}
+        </div>
+    </div>
+</body>
+</html>

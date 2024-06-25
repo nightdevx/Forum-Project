@@ -14,48 +14,57 @@
 
 <body>
     <!-- Yorum Popup Penceresi -->
-<div id="yorumPopup" class="yorum-popup">
-    <div class="yorum-popup-content">
-        <span class="yorum-popup-close">&times;</span>
-        <h2>Yorumlar</h2>
-        <!-- Yorumların gösterileceği yer -->
-        <div class="yorum-liste">
-            <!-- Örnek bir yorum -->
-            <p><strong>Kullanıcı Adı:</strong> Bu harika bir gönderi!</p>
-        </div>
-        <!-- Yorum ekleme formu -->
-        <div class="yorum-ekle">
-            <input type="text" id="yorumInput" placeholder="Yorumunuzu yazın...">
-            <button id="yorumEkleButton">Yorum Ekle</button>
+    <div id="yorumPopup" class="yorum-popup">
+        <div class="yorum-popup-content">
+            <span class="yorum-popup-close">&times;</span>
+            <h2>Yorumlar</h2>
+            <!-- Yorumların gösterileceği yer -->
+            <div class="yorum-liste">
+                <!-- Örnek bir yorum -->
+                <p><strong>Kullanıcı Adı:</strong> Bu harika bir gönderi!</p>
+            </div>
+            <!-- Yorum ekleme formu -->
+            <div class="yorum-ekle">
+                <input type="text" id="yorumInput" placeholder="Yorumunuzu yazın...">
+                <button id="yorumEkleButton">Yorum Ekle</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- sidebar starts -->
-<div class="sidebar">
-    <!-- Twitter icon replaced with a custom image -->
-    <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
-    <button class="sidebarOption active">
-        <span class="material-icons"> home </span>
-        <h2>Ana Sayfa</h2>
-    </button>
+    <div class="sidebar">
+        <!-- Twitter icon replaced with a custom image -->
+        <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
+        <form action="/homepage">
+            <button type="submit" class="sidebarOption active">
+                <span class="material-icons"> home </span>
+                <h2>Ana Sayfa</h2>
+            </button>
+        </form>
 
-    <button class="sidebarOption">
-        <span class="material-icons"> search </span>
-        <h2>Keşfet</h2>
-    </button>
 
-    <button class="sidebarOption">
-        <span class="material-icons"> mail_outline </span>
-        <h2>Mesajlar</h2>
-    </button>
+        <form action="">
+            <button type="submit" class="sidebarOption">
+                <span class="material-icons"> search </span>
+                <h2>Keşfet</h2>
+            </button>
+        </form>
 
-    <button class="sidebarOption">
-        <span class="material-icons"> perm_identity </span>
-        <h2>Profil</h2>
-    </button>
-</div>
-<!-- sidebar ends -->
+        <form action="">
+            <button type="submit" class="sidebarOption">
+                <span class="material-icons"> mail_outline </span>
+                <h2>Mesajlar</h2>
+            </button>
+        </form>
+
+        <form action="/profile">
+            <button type="submit" class="sidebarOption">
+                <span class="material-icons"> perm_identity </span>
+                <h2>Profil</h2>
+            </button>
+        </form>
+    </div>
+    <!-- sidebar ends -->
 
     <!-- feed starts -->
     <div class="feed">
@@ -64,28 +73,29 @@
         </div>
 
         <!-- tweetbox starts -->
-<div class="tweetBox">
-    <form>
-        <div class="tweetbox__input">
-            <img src="https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png" alt="" />
-            <div class="tweetbox__inputContainer">
-                <input type="text" placeholder="Başlık ekleyin..." class="tweetbox__inputTitle" />
-                <input type="text" placeholder="Düşüncelerini paylaş.." class="tweetbox__inputMessage" />
-            </div>
+        <div class="tweetBox">
+            <form action="/" method="post">
+                <div class="tweetbox__input">
+                    <img src="data:image/png;base64,{{.User.ProfileImage}}" alt="" />
+                    <div class="tweetbox__inputContainer">
+                        <input type="text" placeholder="Başlık ekleyin..." class="tweetbox__inputTitle" name="title" />
+                        <input type="text" placeholder="Düşüncelerini paylaş.." class="tweetbox__inputMessage"
+                            name="content" />
+                    </div>
+                </div>
+                <button type="submit" class="tweetBox__tweetButton">Gönder</button>
+                <button class="tweetBox__cameraButton">
+                    <span class="material-icons"> camera_alt </span>
+                </button>
+            </form>
         </div>
-        <button class="tweetBox__tweetButton">Gönder</button>
-        <button class="tweetBox__cameraButton">
-            <span class="material-icons"> camera_alt </span>
-        </button>
-    </form>
-</div>
-<!-- tweetbox ends -->
+        <!-- tweetbox ends -->
 
         <!-- post starts -->
-        {{range .}}
+        {{range .Posts}}
         <div class="post">
             <div class="post__avatar">
-                <img src="https://i.pinimg.com/originals/a6/58/32/a65832155622ac173337874f02b218fb.png" alt="" />
+                <img src="data:image/png;base64,{{.UserData.ProfileImage}}" alt="" />
             </div>
 
             <div class="post__body">
@@ -98,11 +108,15 @@
                         </h3>
                     </div>
                     <div class="post__headerDescription">
+                        <p>{{.PostData.PostTitle}}</p>
+                    </div>
+                    <div class="post__headerDescription">
                         <p>{{.PostData.PostContent}}</p>
                     </div>
                 </div>
-                <img src="https://www.focus2move.com/wp-content/uploads/2020/01/Tesla-Roadster-2020-1024-03.jpg"
-                    alt="" />
+                {{if .PostData.PostImage}}
+                <img src="data:image/png;base64,{{.PostData.PostImage}}" alt="" />
+                {{end}}
                 <div class="post__footer">
                     <button class="post__footerButton">
                         <span class="material-icons"> thumb_up </span> Beğen
@@ -143,7 +157,7 @@
             </blockquote>
             <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
         </div>
-        
+
         <!-- Login and Signup Section -->
         <div class="auth__container">
             <h2>Hesabınız Yok Mu?</h2>
