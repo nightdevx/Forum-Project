@@ -17,40 +17,54 @@
 </head>
 
 <body>
-    <!-- Yan menü başlangıcı -->
-    <div class="sidebar">
-        <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
-        <!-- Ana Sayfa -->
-        <form action="/home" method="get">
-            <button class="sidebarOption">
-                <span class="material-icons">home</span>
-                <h2>Ana Sayfa</h2>
-            </button>
-        </form>
-        <!-- Keşfet -->
-        <form action="/" method="get">
-            <button class="sidebarOption">
-                <span class="material-icons">search</span>
-                <h2>Keşfet</h2>
-            </button>
-        </form>
-        <!-- Profil (aktif sayfa) -->
-        <form action="/profile" method="get">
-            <button type="submit" class="sidebarOption active">
-                <span class="material-icons">perm_identity</span>
-                <h2>Profil</h2>
-            </button>
-        </form>
+   <!-- Yan menü başlangıcı -->
+<div class="sidebar">
+    <img src="/static/images/hüpe.png" alt="Hüpe" class="sidebar__icon" />
+    
+    <!-- Ana Sayfa -->
+    <form action="/home" method="get">
+        <button class="sidebarOption">
+            <span class="material-icons">home</span>
+            <h2>Ana Sayfa</h2>
+        </button>
+    </form>
+    
+    <!-- Keşfet -->
+    <form action="/" method="get">
+        <button class="sidebarOption">
+            <span class="material-icons">search</span>
+            <h2>Keşfet</h2>
+        </button>
+    </form>
+    
+    <!-- Profil (aktif sayfa) -->
+    <form action="/profile" method="get">
+        <button type="submit" class="sidebarOption active">
+            <span class="material-icons">perm_identity</span>
+            <h2>Profil</h2>
+        </button>
+    </form>
+    
+<!-- profile.html -->
+<form action="profile/likes" method="get">
+    <button class="sidebarOption">
+        <span class="material-icons">favorite</span>
+        <h2>Beğeniler</h2>
+    </button>
+</form>
 
-        <!-- Çıkış Yap -->
-        <form action="/logout" method="get">
-            <button type="submit" class="sidebarOption">
-                <span class="material-icons">logout</span>
-                <h2>Çıkış Yap</h2>
-            </button>
-        </form>
-    </div>
-    <!-- Yan menü sonu -->
+
+    
+    <!-- Çıkış Yap -->
+    <form action="/logout" method="get">
+        <button type="submit" class="sidebarOption">
+            <span class="material-icons">logout</span>
+            <h2>Çıkış Yap</h2>
+        </button>
+    </form>
+</div>
+<!-- Yan menü sonu -->
+
 
     <!-- İçerik başlangıcı -->
     <div class="feed">

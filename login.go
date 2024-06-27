@@ -58,6 +58,17 @@ func setSession(w http.ResponseWriter, userID int, email string, rememberMe bool
 var sessionStore = map[string]string{}
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if the user is already logged in by checking the session cookie
+	cookie, err := r.Cookie("session_token")
+	if err == nil {
+		// If the cookie exists, check if the user is in the session store
+		if _, ok := sessionStore[cookie.Value]; ok {
+			// If the user is found in the session store, redirect to the homepage
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
+			return
+		}
+	}
+
 	if r.Method != http.MethodPost {
 		tmpl, _ := template.ParseFiles("./static/html/login.html")
 		tmpl.Execute(w, nil)
@@ -68,13 +79,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	rememberMe := r.FormValue("remember_me") == "on"
 
-	db, err := openDatabase()
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		fmt.Println("Database connection error")
-		return
-	}
-	defer db.Close()
+	connectDatabase()
 
 	authenticated, userID, err := authenticateUser(email, password)
 	if err != nil {
@@ -90,8 +95,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		}{
 			ErrorMessage: "Geçersiz e-posta veya şifre",
 		}
+		w.WriteHeader(http.StatusUnauthorized) // Optional: set 401 Unauthorized status code
 		tmpl.Execute(w, data)
-
 		return
 	}
 
@@ -102,28 +107,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Ana sayfaya yönlendir
-	http.Redirect(w, r, "/homepage", http.StatusSeeOther)
-}
-
-func homepageHandler(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	userID := cookie.Value
-	email, ok := sessionStore[userID]
-	if !ok {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	// Kullanıcının email adresini göster
-	fmt.Fprintf(w, "Giriş başarılı! Hoş geldiniz, %s.", email)
+	// Redirect to the homepage
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }

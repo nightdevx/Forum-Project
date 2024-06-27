@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Liked Posts</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .post {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .post img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        .post .title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .post .content {
+            margin-top: 10px;
+        }
+        .post .footer {
+            margin-top: 20px;
+        }
+        .post .footer span {
+            margin-right: 15px;
+        }
+        .post .footer .like, .post .footer .dislike {
+            color: red;
+        }
+        .navbar {
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
+        .navbar .navbar-brand {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="#">Logo</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/profile">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/explore">Explore</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        {{range .}}
+        <div class="post">
+            <div class="title">{{.PostData.PostTitle}}</div>
+            <div class="content">{{.PostData.PostContent}}</div>
+            {{if .PostData.PostImage}}
+            <div>
+                <img src="data:image/png;base64,{{.PostData.PostImage}}" alt="Post Image">
+            </div>
+            {{end}}
+            <div class="footer">
+                <span>Category: {{.PostData.PostCategory}}</span>
+                <span>Likes: {{.PostData.PostLikeCount}}</span>
+                <span>Dislikes: {{.PostData.PostDislikeCount}}</span>
+                <span class="like">❤️</span>
+                <span class="dislike">💔</span>
+            </div>
+            <div class="footer">
+                <span>Posted by: {{.UserData.Username}} ({{.UserData.Name}})</span>
+            </div>
+        </div>
+        {{end}}
+    </div>
+</body>
+</html>

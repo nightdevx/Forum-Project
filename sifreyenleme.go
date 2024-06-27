@@ -15,9 +15,6 @@ import (
 // Şifre sıfırlama işleyicisi
 func sifreyenilemeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
-
-		tmpl, err := template.ParseFiles("./static/html/sifreyenileme.html")
-
 		tmpl, err := template.ParseFiles("static/html/sifreyenileme.html")
 		if err != nil {
 			http.Error(w, "Şablon dosyası yüklenemedi", http.StatusInternalServerError)
@@ -28,17 +25,6 @@ func sifreyenilemeHandler(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodPost {
 		email := r.FormValue("email")
 		tckimlikLast3 := r.FormValue("tckimlik_last3")
-
-		db, err := openDatabase()
-		if err != nil {
-			http.Error(w, "Veritabanı bağlantı hatası", http.StatusInternalServerError)
-			return
-		}
-		defer db.Close()
-
-		var userID int
-		var storedTCKimlik string
-		err = db.QueryRow("SELECT id, tckimlik FROM users WHERE email = ?", email).Scan(&userID, &storedTCKimlik)
 
 		connectDatabase()
 		var userID int
@@ -89,18 +75,8 @@ func generateRandomPassword() (string, error) {
 
 // Veritabanında şifre güncelleme
 func updatePassword(userID int, newPassword string) error {
-
-	db, err := openDatabase()
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	_, err = db.Exec("UPDATE users SET password = ? WHERE id = ?", newPassword, userID)
-
 	connectDatabase()
 	_, err := database.Exec("UPDATE users SET password = ? WHERE id = ?", newPassword, userID)
-
 	if err != nil {
 		return err
 	}

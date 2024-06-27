@@ -14,6 +14,7 @@ import (
 var tmpl = template.Must(template.ParseFiles("static/html/login.html"))
 
 func SignupHandler(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method != http.MethodPost {
 		tmpl.Execute(w, nil)
 		return
@@ -24,6 +25,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	surname := r.FormValue("surname")
 	email := r.FormValue("email")
 	password := r.FormValue("password")
+	tcKimlik := r.FormValue("tc-kimlik")
 
 	message := ""
 
@@ -55,21 +57,28 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Kullanıcı adı ve e-posta adresi yoksa, yeni kayıt oluşturulur.
-	stmt, err := database.Prepare("INSERT INTO users(username, name, surname, email, password,image) VALUES(?, ?, ?, ?, ?,?)")
+	stmt, err := database.Prepare("INSERT INTO users(username, name, surname, email, password, image, tckimlik) VALUES(?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(username, name, surname, email, password, getDefaultImage())
+	_, err = stmt.Exec(username, name, surname, email, password, getDefaultImage(), tcKimlik)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Kayıt başarılı mesajı
-	tmpl.Execute(w, nil)
+	tmpl.Execute(w, struct{ Message string }{Message: "kayıt başarılı"})
+	// Cookie oluşturma
+	cookie := http.Cookie{
+		Name:  "user_email",
+		Value: email,
+		Path:  "/",
+	}
+	http.SetCookie(w, &cookie)
 }
 
 func getDefaultImage() []byte {

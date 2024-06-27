@@ -9,8 +9,8 @@ func main() {
 	fs := http.FileServer(http.Dir("static/"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/home", homePageHandler)
-	http.Handle("/profile", http.HandlerFunc(profileHandler))
-	http.Handle("/editProfile", http.HandlerFunc(editProfileHandler))
+	http.HandleFunc("/profile", http.HandlerFunc(profileHandler))
+	http.HandleFunc("/editProfile", http.HandlerFunc(editProfileHandler))
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/signup", SignupHandler)
@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/home/likepost", likePostHandler)
 	http.HandleFunc("/home/dislikepost", dislikePostHandler)
 	http.HandleFunc("/sifreyenileme", sifreyenilemeHandler)
+	http.HandleFunc("/profile/likes", likesHandler)
 
 	// Custom default handler to handle unknown routes
 	defaultHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +36,11 @@ func main() {
 
 // Function to check if the URL path is a known route
 func knownRoutes(path string) bool {
-	knownPaths := []string{"/home", "/profile", "/editProfile", "/sharePost", "/login", "/logout", "/signup", "/profile/likepost", "/profile/dislikepost","/home/likepost","/home/dislikepost", "/sifreyenileme", "/static/"}
+	knownPaths := []string{
+		"/home", "/profile", "/editProfile", "/sharePost", "/login", "/logout",
+		"/signup", "/profile/likepost", "/profile/dislikepost", "/home/likepost",
+		"/home/dislikepost", "/sifreyenileme", "/static/", "/profile/likes",
+	}
 	for _, p := range knownPaths {
 		if path == p || (p == "/static/" && len(path) > len(p) && path[:len(p)] == p) {
 			return true
