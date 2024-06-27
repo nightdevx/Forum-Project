@@ -6,7 +6,18 @@ import (
 )
 
 func PostPageHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
+	if r.Method == http.MethodPost {
+		cookie, _ := r.Cookie("session_token")
+		userID := cookie.Value
+		commentContent := r.FormValue("comment")
+		commentedPostID := r.FormValue("commentPostID")
+		addCommentToDb(commentContent, commentedPostID, userID)
+
+		// Extract query parameters from the original URL
+		redirectURL := "/postpage?id=" + commentedPostID
+		http.Redirect(w, r, redirectURL, http.StatusFound)
+
+	} else if r.Method == http.MethodGet {
 		cookie, _ := r.Cookie("session_token")
 		postID := r.FormValue("id")
 		post, _ := getPostById(postID)
@@ -37,12 +48,6 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	} else if r.Method == "POST" {
-		cookie, _ := r.Cookie("session_token")
-		userID := cookie.Value
-		commentContent := r.FormValue("comment")
-		commentedPostID := r.FormValue("commentPostID")
-		addCommentToDb(commentContent, commentedPostID, userID)
-		http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
 	}
 }
+

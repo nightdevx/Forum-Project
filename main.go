@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/home/likepost", likePostHandler)
 	http.HandleFunc("/home/dislikepost", dislikePostHandler)
 	http.HandleFunc("/postpage", PostPageHandler)
+	// http.HandleFunc("/postpage/comment", CommentHandler)
 	http.HandleFunc("/sifreyenileme", sifreyenilemeHandler)
 
 	// Custom default handler to handle unknown routes
