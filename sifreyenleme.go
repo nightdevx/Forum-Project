@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"html/template"
-
 	"net/http"
 	"strings"
 
@@ -16,7 +15,10 @@ import (
 // Şifre sıfırlama işleyicisi
 func sifreyenilemeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
+
 		tmpl, err := template.ParseFiles("./static/html/sifreyenileme.html")
+
+		tmpl, err := template.ParseFiles("static/html/sifreyenileme.html")
 		if err != nil {
 			http.Error(w, "Şablon dosyası yüklenemedi", http.StatusInternalServerError)
 			return
@@ -37,6 +39,11 @@ func sifreyenilemeHandler(w http.ResponseWriter, r *http.Request) {
 		var userID int
 		var storedTCKimlik string
 		err = db.QueryRow("SELECT id, tckimlik FROM users WHERE email = ?", email).Scan(&userID, &storedTCKimlik)
+
+		connectDatabase()
+		var userID int
+		var storedTCKimlik string
+		err := database.QueryRow("SELECT id, tckimlik FROM users WHERE email = ?", email).Scan(&userID, &storedTCKimlik)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				http.Error(w, "Bu e-posta ile kayıtlı kullanıcı bulunamadı", http.StatusNotFound)
@@ -82,6 +89,7 @@ func generateRandomPassword() (string, error) {
 
 // Veritabanında şifre güncelleme
 func updatePassword(userID int, newPassword string) error {
+
 	db, err := openDatabase()
 	if err != nil {
 		return err
@@ -89,6 +97,10 @@ func updatePassword(userID int, newPassword string) error {
 	defer db.Close()
 
 	_, err = db.Exec("UPDATE users SET password = ? WHERE id = ?", newPassword, userID)
+
+	connectDatabase()
+	_, err := database.Exec("UPDATE users SET password = ? WHERE id = ?", newPassword, userID)
+
 	if err != nil {
 		return err
 	}

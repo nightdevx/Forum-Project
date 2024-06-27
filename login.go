@@ -11,21 +11,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Veritabanı bağlantısını açar
-func openDatabase() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./database/forum.db")
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
 // Kullanıcının giriş bilgilerini doğrular ve kullanıcı ID'sini döner
-func authenticateUser(db *sql.DB, email, password string) (bool, int, error) {
+func authenticateUser(email, password string) (bool, int, error) {
 	var storedPassword string
 	var userID int
 	query := "SELECT id, password FROM users WHERE email = ?"
-	err := db.QueryRow(query, email).Scan(&userID, &storedPassword)
+	err := database.QueryRow(query, email).Scan(&userID, &storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false, 0, nil
@@ -79,13 +70,13 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	db, err := openDatabase()
 	if err != nil {
-		http.Error(w, "Database connection error", http.StatusInternalServerError)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		fmt.Println("Database connection error")
 		return
 	}
 	defer db.Close()
 
-	authenticated, userID, err := authenticateUser(db, email, password)
+	authenticated, userID, err := authenticateUser(email, password)
 	if err != nil {
 		http.Error(w, "Authentication error", http.StatusInternalServerError)
 		fmt.Println("Authentication error")

@@ -28,7 +28,7 @@ body {
   min-width: 1000px;
   min-height: 600px;
   height: 600px;
-  padding: 25px;
+  padding: 255px;
   background-color: #ffffff; /* Beyaz arka plan, anasayfadaki bileşenlerin arka planı gibi */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Hafif bir gölge efekti */
   border-radius: 12px;
