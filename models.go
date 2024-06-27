@@ -1,8 +1,9 @@
 package main
 
 type PostData struct {
-	UserData User
-	PostData Post
+	UserData     User
+	PostData     Post
+	CommentsData []Comment
 }
 
 type Post struct {
@@ -26,6 +27,15 @@ type User struct {
 	CreationDate string
 	BannerImage  string
 	ProfileImage string
+}
+
+type Comment struct {
+	CommentOwner       string
+	CommentID          string
+	CommentContent     string
+	CommentLikeCount   string
+	CommentDislikeCount string
+	CommentCreatedAt   string
 }
 
 type Image struct {

@@ -18,6 +18,7 @@ func main() {
 	http.HandleFunc("/profile/dislikepost", dislikePostHandler)
 	http.HandleFunc("/home/likepost", likePostHandler)
 	http.HandleFunc("/home/dislikepost", dislikePostHandler)
+	http.HandleFunc("/postpage", PostPageHandler)
 	http.HandleFunc("/sifreyenileme", sifreyenilemeHandler)
 
 	// Custom default handler to handle unknown routes
@@ -35,7 +36,7 @@ func main() {
 
 // Function to check if the URL path is a known route
 func knownRoutes(path string) bool {
-	knownPaths := []string{"/home", "/profile", "/editProfile", "/sharePost", "/login", "/logout", "/signup", "/profile/likepost", "/profile/dislikepost","/home/likepost","/home/dislikepost", "/sifreyenileme", "/static/"}
+	knownPaths := []string{"/home", "/profile", "/editProfile", "/sharePost", "/login", "/logout", "/signup", "/profile/likepost", "/profile/dislikepost", "/home/likepost", "/home/dislikepost", "/sifreyenileme", "/postpage", "/static/"}
 	for _, p := range knownPaths {
 		if path == p || (p == "/static/" && len(path) > len(p) && path[:len(p)] == p) {
 			return true

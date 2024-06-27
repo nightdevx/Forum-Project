@@ -92,23 +92,3 @@ func homePageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTopPosts() ([]PostData, error) {
-	connectDatabase()
-	rows, err := database.Query(`select users.username,users.name,users.surname, posts.id,posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
-from posts join users on posts.user_id = users.id ORDER BY like_count DESC LIMIT 3`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []PostData
-	for rows.Next() {
-		var post PostData
-		var image Image
-		err = rows.Scan(&post.UserData.Username, &post.UserData.Name, &post.UserData.Surname, &post.PostData.PostID, &post.PostData.PostTitle, &post.PostData.PostContent, &post.PostData.PostCreatedAt, &post.PostData.PostLikeCount, &post.PostData.PostDislikeCount, &image.ImageData)
-		post.PostData.PostImage = convertImg(image)
-		checkError(err)
-		posts = append(posts, post)
-	}
-	return posts, nil
-}

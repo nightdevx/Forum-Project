@@ -93,7 +93,7 @@ func getPosts(userID string) ([]Post, error) {
 	}
 	defer database.Close()
 
-	query := `SELECT id, title, content, created_at, like_count, dislike_count FROM posts WHERE user_id = ? ORDER BY created_at DESC`
+	query := `SELECT id, title, content, created_at, like_count, dislike_count, image FROM posts WHERE user_id = ? ORDER BY created_at DESC`
 	rows, err := database.Query(query, userID)
 	if err != nil {
 		return []Post{}, err
@@ -103,9 +103,11 @@ func getPosts(userID string) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.PostID, &post.PostTitle, &post.PostContent, &post.PostCreatedAt, &post.PostLikeCount, &post.PostDislikeCount); err != nil {
+		var postImage Image
+		if err := rows.Scan(&post.PostID, &post.PostTitle, &post.PostContent, &post.PostCreatedAt, &post.PostLikeCount, &post.PostDislikeCount, &postImage.ImageData); err != nil {
 			return []Post{}, err
 		}
+		post.PostImage = convertImg(postImage)
 		posts = append(posts, post)
 	}
 
@@ -114,6 +116,77 @@ func getPosts(userID string) ([]Post, error) {
 	}
 
 	return posts, nil
+}
+
+func getPostById(postID string) (PostData, error) {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return PostData{}, err
+	}
+	defer database.Close()
+
+	query := `select users.image,users.username,users.name,users.surname, posts.id,posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
+		from posts
+		join users on posts.user_id = users.id
+		where posts.id = ?`
+
+	rows, err := database.Query(query, postID)
+	if err != nil {
+		fmt.Println(err)
+		return PostData{}, err
+	}
+	defer rows.Close()
+
+	var post PostData
+	for rows.Next() {
+		var postImage Image
+		var userImage Image
+		if err := rows.Scan(&userImage.ImageData, &post.UserData.Username, &post.UserData.Name, &post.UserData.Surname, &post.PostData.PostID, &post.PostData.PostTitle, &post.PostData.PostContent, &post.PostData.PostCreatedAt, &post.PostData.PostLikeCount, &post.PostData.PostDislikeCount, &postImage.ImageData); err != nil {
+			fmt.Println(err)
+			return PostData{}, err
+		}
+		post.PostData.PostImage = convertImg(postImage)
+		post.CommentsData = getCommentsByPostID(postID)
+	}
+	if err := rows.Err(); err != nil {
+		fmt.Println(err)
+		return PostData{}, err
+	}
+
+	return post, nil
+}
+
+func getCommentsByPostID(postID string) []Comment {
+	connectDatabase()
+	query := `SELECT 
+			comments.comment_id, comments.content, comments.created_at, comments.like_count, comments.dislike_count,
+			users.username
+		FROM 
+			comments
+		INNER JOIN 
+			users ON comments.user_id = users.id
+		WHERE 
+			comments.post_id = ?`
+
+	rows, err := database.Query(query, postID)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(&comment.CommentID, &comment.CommentContent, &comment.CommentCreatedAt, &comment.CommentLikeCount, &comment.CommentDislikeCount, &comment.CommentOwner)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+		comments = append(comments, comment)
+	}
+	return comments
 }
 
 func getAllPosts() []PostData {
@@ -291,4 +364,38 @@ func getUsersTopPosts(userID string) []PostData {
 		posts = append(posts, post)
 	}
 	return posts
+}
+
+func getTopPosts() ([]PostData, error) {
+	connectDatabase()
+	rows, err := database.Query(`select users.username,users.name,users.surname, posts.id,posts.title, posts.content ,posts.created_at, posts.like_count, posts.dislike_count,posts.image
+from posts join users on posts.user_id = users.id ORDER BY like_count DESC LIMIT 3`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []PostData
+	for rows.Next() {
+		var post PostData
+		var image Image
+		err = rows.Scan(&post.UserData.Username, &post.UserData.Name, &post.UserData.Surname, &post.PostData.PostID, &post.PostData.PostTitle, &post.PostData.PostContent, &post.PostData.PostCreatedAt, &post.PostData.PostLikeCount, &post.PostData.PostDislikeCount, &image.ImageData)
+		post.PostData.PostImage = convertImg(image)
+		checkError(err)
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
+func addCommentToDb(content string, postID, userID string) {
+	connectDatabase()
+	stmt, err := database.Prepare("insert into comments (post_id,user_id, content) values (?, ?, ?)")
+	checkError(err)
+	defer stmt.Close()
+
+	_, err = stmt.Exec(postID, userID, content)
+	checkError(err)
+}
+
+func getComments() {
 }

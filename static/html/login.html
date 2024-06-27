@@ -6,6 +6,12 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="/static/css/login.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        .error-message {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -17,23 +23,31 @@
         <div class="main">
             <div class="container a-container" id="a-container">
                 <form id="a-form" class="form" method="POST" action="/signup">
+                    {{ if .Message }}
+                    <p class="error-message">{{ .Message }}</p>
+                    {{ end }}
+
                     <h2 class="form_title title">Hesabınızı Oluşturun!</h2>
                     <input class="form__input" type="text" placeholder="Kullanıcı Adı" name="username" required>
                     <input class="form__input" type="text" placeholder="İsim" name="name" required>
                     <input class="form__input" type="text" placeholder="Soyisim" name="surname" required>
                     <input class="form__input" type="email" placeholder="E-Posta" name="email" required>
                     <input class="form__input" type="password" placeholder="Şifreniz" name="password" required>
+                    <input class="form__input" type="text" id="tc-kimlik" name="tc-kimlik" maxlength="11" pattern="\d{11}" placeholder="T.C. kimlik numarası(zorunlu değil)">
                     <input class="button" type="submit" value="Hesap Oluştur">
                 </form>
             </div>
 
             <div class="container b-container" id="b-container">
                 <form id="b-form" class="form" method="POST" action="/login">
-                    <h2 class="form_title title">Hesabınıza giriş yapın!</h2>
+                    {{ if .ErrorMessage }}
+                    <p class="error-message">{{ .ErrorMessage }}</p>
+                    {{ end }}
 
+                    <h2 class="form_title title">Hesabınıza giriş yapın!</h2>
                     <input class="form__input" type="text" placeholder="E-Posta" name="email">
                     <input class="form__input" type="password" placeholder="Şifreniz" name="password">
-                    <a class="form__link" href="#">Şifrenizi mi unuttunuz?</a>
+                    <a class="form__link" href="/static/html/sifreyenileme.html">Şifrenizi mi unuttunuz?</a>
                     <input class="button" type="submit" value="Giriş Yap">
                 </form>
             </div>
@@ -59,6 +73,7 @@
         </div>
 
         <script src="/static/js/login.js"></script>
+    </div>
 </body>
 
 </html>
