@@ -5,7 +5,7 @@ services:
     build: .
     image: forum:latest 
     ports:
-      - "8040:8040"
+      - "8080:8080"
     volumes:
       - .:/go/src/app
     depends_on:

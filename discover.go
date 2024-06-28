@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/base64"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -35,6 +36,7 @@ func convertImageToBase64(image []byte) string {
 // handleFilter handles filtering requests based on categories, likes, and all posts
 func handleFilter(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
+		fmt.Println("test")
 		// Render the response using the template
 		tmpl := template.Must(template.ParseFiles("static/html/discovered.html"))
 		err := tmpl.Execute(w, TemplateData{})
@@ -62,33 +64,26 @@ func handleFilter(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Get filter type from form data
-		filter := r.Form.Get("filter")
+		filter := r.FormValue("filter")
+		keyword := r.Form.Get("keyword")
+		keyword = "%" + keyword + "%"
 		var query string
-		var args []interface{}
 
 		switch filter {
-		case "likes":
-			query = `
-			SELECT id, title, content, like_count, dislike_count, image 
-			FROM posts 
-			WHERE like_count > 0
-			ORDER BY like_count DESC
-		`
 		case "allPosts":
 			query = `
 			SELECT id, title, content, like_count, dislike_count, image 
 			FROM posts 
+			WHERE title LIKE ? OR content LIKE ? OR category LIKE ?
 			ORDER BY created_at DESC
 		`
 		case "categories":
-			keyword := r.Form.Get("keyword")
 			query = `
 			SELECT id, title, content, like_count, dislike_count, image 
 			FROM posts 
-			WHERE category LIKE ?
+			WHERE category LIKE ? AND (title LIKE ? OR content LIKE ? OR category LIKE ?)
 			ORDER BY created_at DESC
 		`
-			args = append(args, "%"+keyword+"%")
 		default:
 			log.Println("Unknown filter type:", filter)
 			http.Error(w, "Bad request", http.StatusBadRequest)
@@ -96,7 +91,7 @@ func handleFilter(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Execute the query
-		rows, err := db.Query(query, args...)
+		rows, err := db.Query(query, keyword, keyword, keyword)
 		if err != nil {
 			log.Println("Error querying database:", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -122,6 +117,13 @@ func handleFilter(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-
+		fmt.Println(posts)
+		tmpl := template.Must(template.ParseFiles("static/html/discovered.html"))
+		err = tmpl.Execute(w, posts)
+		if err != nil {
+			log.Println("Error executing template:", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 	}
 }

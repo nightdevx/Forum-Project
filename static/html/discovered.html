@@ -45,17 +45,17 @@
         <div class="feed__header">
             <h2>Hüpeye Hoşgeldiniz...</h2>
         </div>
-        {{if .IsLoggedIn}}
         <!-- tweetbox starts -->
         <div class="tweetBox">
-            <form action="/filter" method="post">
+            <form action="/discover" method="post">
                 <div class="tweetbox__input">
                     <!-- Sadece textarea ve radyo butonları ekleniyor -->
-                    <textarea placeholder="Ara..." class="tweetbox__inputMessage" name="content" rows="3" minlength="10"></textarea>
+                    <textarea placeholder="Ara..." class="tweetbox__inputMessage" name="content" rows="3"
+                        minlength="3"></textarea>
                 </div>
                 <!-- Radio buttons for filtering -->
                 <div class="tweetBox__filters">
-                    <input type="radio" id="likes" name="filter" value="likes">
+                    <input type="radio" id="likes" name="filter" value="likes" checked>
                     <label for="likes">Beğeniler</label>
                     <input type="radio" id="allPosts" name="filter" value="allPosts">
                     <label for="allPosts">Tüm Postlar</label>
@@ -66,13 +66,13 @@
                 <button type="submit" class="tweetBox__searchButton">Ara</button>
             </form>
         </div>
-        {{end}}
         <!-- tweetbox ends -->
     </div>
     <!-- feed ends -->
 
     <!-- post starts -->
-    {{range .Posts}}
+    {{if .}}
+    {{range .}}
     <div class="post">
         <div class="post__avatar">
             <img src="data:image/png;base64,{{.PostImage}}" alt="" />
@@ -83,7 +83,8 @@
                 <div class="post__headerText">
                     <h3>
                         Kullanıcı Adı
-                        <span class="post__headerSpecial"><span class="material-icons post__badge"> verified </span>@KullanıcıAdı</span>
+                        <span class="post__headerSpecial"><span class="material-icons post__badge"> verified
+                            </span>@KullanıcıAdı</span>
                     </h3>
                 </div>
                 <div class="post__headerDescription">
@@ -110,9 +111,10 @@
         </div>
     </div>
     {{end}}
+    {{end}}
     <!-- post ends -->
-</div>
-<!-- feed ends -->
+    </div>
+    <!-- feed ends -->
 
     <!-- Scripts -->
     <script src="/static/js/homepage.js"></script>

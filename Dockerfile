@@ -19,7 +19,7 @@ RUN go mod tidy
 # Uygulamayı derle
 RUN go build -o main .
 
-EXPOSE 8040
+EXPOSE 8080
 
 # Uygulamayı başlat
 CMD ["./main"]

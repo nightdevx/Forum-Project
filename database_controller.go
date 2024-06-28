@@ -222,23 +222,23 @@ func checkError(err error) {
 	}
 }
 
-func insertPost(userID int, title, content string, image []byte) {
+func insertPost(userID int, title, content, categories string, image []byte) {
 	connectDatabase()
 	var stmt *sql.Stmt
 	var err error
 	if image == nil {
-		stmt, err = database.Prepare("insert into posts (user_id, title, content) values (?, ?, ?)")
+		stmt, err = database.Prepare("insert into posts (user_id, title, content,category) values (?, ?, ?,?)")
 		checkError(err)
 		defer stmt.Close()
 
-		_, err = stmt.Exec(userID, title, content)
+		_, err = stmt.Exec(userID, title, content, categories)
 		checkError(err)
 	} else {
-		stmt, err = database.Prepare("insert into posts (user_id, title, content,image) values (?, ?, ?,?)")
+		stmt, err = database.Prepare("insert into posts (user_id, title, content,category,image) values (?, ?, ?,?,?)")
 		checkError(err)
 		defer stmt.Close()
 
-		_, err = stmt.Exec(userID, title, content, image)
+		_, err = stmt.Exec(userID, title, content, categories, image)
 		checkError(err)
 	}
 }
