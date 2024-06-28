@@ -574,3 +574,43 @@ body {
 .commentButton:hover {
   color: #DF3821;
 }
+/* Genel stil */
+.login-signup {
+    margin-top: 10px; /* Widgets'in altından biraz boşluk */
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f5f8fa; /* Arka plan rengi */
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Başlık stili */
+.login-signup h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #DF3821; /* Mavi renk, Twitter tarzı */
+}
+
+/* Butonlar için genel stil */
+.login-signup button {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color:#DF3821 ; /* Mavi buton rengi */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Buton hover efekti */
+.login-signup button:hover {
+    background-color: #DF3821;
+}
+
+/* Butonları yan yana hizalama */
+.login-signup form {
+    display: inline-block;
+}

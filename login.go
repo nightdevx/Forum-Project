@@ -7,12 +7,11 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
+"golang.org/x/crypto/bcrypt"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Kullanıcının giriş bilgilerini doğrular ve kullanıcı ID'sini döner
-func authenticateUser( email, password string) (bool, int, error) {
+func authenticateUser(email, password string) (bool, int, error) {
 	var storedPassword string
 	var userID int
 	query := "SELECT id, password FROM users WHERE email = ?"
@@ -24,8 +23,8 @@ func authenticateUser( email, password string) (bool, int, error) {
 		return false, 0, err
 	}
 
-	// Şifreyi karşılaştır (şifreleme olmadan)
-	if password != storedPassword {
+	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
+	if err != nil {
 		return false, 0, nil
 	}
 	return true, userID, nil
@@ -59,6 +58,11 @@ var sessionStore = map[string]string{}
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		cookie, _ := r.Cookie("session_token")
+		if cookie != nil {
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
+			return
+		}
 		tmpl, _ := template.ParseFiles("./static/html/login.html")
 		tmpl.Execute(w, nil)
 		return

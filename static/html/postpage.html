@@ -68,14 +68,17 @@
                 {{if .PostData.PostData.PostImage}}
                 <img src="data:image/png;base64,{{.PostData.PostData.PostImage}}" alt="" />
                 {{end}}
-                <div class="post__footer">
-                    <button class="post__footerButton">
-                        <span class="material-icons"> thumb_up </span> Beğen
-                    </button>
-                    <button class="post__footerButton">
-                        <span class="material-icons"> thumb_down </span> Beğenme
-                    </button>
-                </div>
+                <form action="/home/likepost" method="post">
+                    <button type="submit" value="{{.PostData.PostData.PostID}}" name="id"
+                        class="material-icons">thumb_up</button>
+                    <label>{{.PostData.PostData.PostLikeCount}}</label>
+                </form>
+                <!-- Beğenmeme İkonu -->
+                <form action="/home/dislikepost" method="post">
+                    <button type="submit" value="{{.PostData.PostData.PostID}}" name="id"
+                        class="material-icons">thumb_down</button>
+                    <label>{{.PostData.PostData.PostDislikeCount}}</label>
+                </form>
                 <h2>Yorumlar</h2>
                 <!-- Comments list -->
                 <div class="yorum-liste">
@@ -84,10 +87,17 @@
                     <div class="yorum">
                         <p><strong>{{.CommentOwner}}</strong>{{.CommentContent}}</p>
                         <div class="yorum-footer">
-                            <button class="yorum-begen-button"><span class="material-icons">thumb_up</span>
-                                {{.CommentLikeCount}}</button>
-                            <button class="yorum-begenme-button"><span class="material-icons">thumb_down</span>
-                                {{.CommentDislikeCount}}</button>
+                            <form action="/postpage/likecomment">
+                                <button class="yorum-begen-button" name="commentid" value="{{.CommentID}}"><span
+                                        class="material-icons">thumb_up</span>
+                                    {{.CommentLikeCount}}</button>
+                            </form>
+                            <form action="/postpage/dislikecomment">
+                                <input type="hidden" name="postid" value="{{$.PostData.PostData.PostID}}">
+                                <button class="yorum-begenme-button" name="commentid" value="{{.CommentID}}"><span
+                                        class="material-icons">thumb_down</span>
+                                    {{.CommentDislikeCount}}</button>
+                            </form>
                         </div>
                     </div>
                     {{end}}

@@ -331,6 +331,94 @@ func decreaseDislikeCount(postID string) error {
 	return nil
 }
 
+func increaseLikeCommentCount(commentID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE comments SET like_count = like_count + 1 WHERE comment_id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(commentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decreaseLikeCommentCount(commentID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE comments SET like_count = like_count - 1 WHERE comment_id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(commentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func increaseDislikeCommentCount(commentID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE comments SET dislike_count = dislike_count + 1 WHERE comment_id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(commentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func decreaseDislikeCommentCount(commentID string) error {
+	err := connectDatabase()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	// Hazırlık işlemi (Prepare statement)
+	query, err := database.Prepare("UPDATE comments SET dislike_count = dislike_count - 1 WHERE comment_id = ?")
+	if err != nil {
+		return err
+	}
+	defer query.Close()
+
+	// Parametreleri geçirerek sorguyu çalıştırma
+	_, err = query.Exec(commentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func saveImageToDB(data []byte, userID string, picture string) {
 	connectDatabase()
 	updateImageSQL := fmt.Sprintf("UPDATE users SET %s = ? WHERE id = ?", picture)
@@ -395,7 +483,4 @@ func addCommentToDb(content string, postID, userID string) {
 
 	_, err = stmt.Exec(postID, userID, content)
 	checkError(err)
-}
-
-func getComments() {
 }
